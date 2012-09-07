@@ -1,0 +1,605 @@
+<html>
+    <style type="text/css">
+        #patterns table {
+            border: 10px;
+        }
+        .note {
+            color: purple;
+            background-color: #d8da3d;
+            padding: 0px;
+            border: 0px;
+            font-family: monospace;
+            size: 3;
+        }
+        .inst {
+            color: green;
+            background-color: #d8da3d;
+            padding: 0px;
+            border: 0px;
+            font-family: monospace;
+            size: 3;
+        }
+        .vol {
+            color: yellow;
+            background-color: #d8da3d;
+            padding: 0px;
+            border: 0px;
+            font-family: monospace;
+            size: 3;
+        }
+        .eff {
+            color: black;
+            background-color: #d8da3d;
+            padding: 0px;
+            border: 0px;
+            font-family: monospace;
+            size: 3;
+        }
+        .effval {
+            color: red;
+            background-color: #d8da3d;
+            padding: 0px;
+            border: 0px;
+            font-family: monospace;
+            size: 3;
+        }
+        .but {
+            background-color: #ffddff;
+            border: 5px;
+            padding: 5px;
+        }
+        .patternSelector {
+            background-color: #ddffdd;
+            border: 5px;
+            padding: 5px;
+        }
+  </style>
+
+    <script type="text/javascript">
+        var playUri;
+        var restartUri;
+        var stopUri;
+   //     var globalVolUri;
+        var sequenceUri;
+        var patternUri;
+        var loopPatternUri;
+        var patternsUri;
+        var instrumentsUri;
+        var jsongUri;
+
+        var xmlhttp;
+        //var globalVol = null;
+        var modglobals = null;
+        var sequence = null;
+        var patterns = null;
+        var instruments = null;
+        var loopPatternNo = null;
+
+        function init() {
+            // init for ajax requests.
+            xmlhttp = new XMLHttpRequest();
+            initAPI();
+        }
+
+
+        function initAPI() {
+            var tuneUri = document.getElementById('tuneUri').value;
+            var codedUri = encodeURIComponent(tuneUri);
+            loadUri = document.location.href + "/" + codedUri + "";
+            jsongUri = document.location.href + "/" + codedUri + "/jsong";
+
+            playUri = document.location.href + "/" + codedUri + "/play";
+            // loopPatternUri is a dogs dinner:
+            loopPatternUri = document.location.href + "/" + codedUri + "/pattern/";
+            restartUri = document.location.href + "/" + codedUri + "/restart";
+            stopUri = document.location.href + "/" + codedUri + "/stop";
+            //globalVolUri = document.location.href + "/" + codedUri + "/global_volume";
+            sequenceUri = document.location.href + "/" + codedUri + "/sequence";
+            patternUri = document.location.href + "/" + codedUri + "/pattern";
+            patternsUri = document.location.href + "/" + codedUri + "/patterns";
+            instrumentsUri = document.location.href + "/" + codedUri + "/instruments";
+        }
+
+        function get_jsong() {
+            xmlhttp.open('GET', jsongUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200)
+                log(jsongUri);      
+        }
+
+
+        function load() {
+            initAPI();
+            xmlhttp.open('GET', loadUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200)
+                log(loadUri);      
+                modglobals = eval("("+xmlhttp.responseText+")");
+        }
+
+        function play() {
+            xmlhttp.open('GET', playUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200)
+                log(playUri);      
+        }
+
+        function restart() {
+            xmlhttp.open('GET', restartUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200)
+                log(restartUri);      
+        }
+
+        function loopPatternPlay(patNo) {
+            loopUri = loopPatternUri + patNo + "/play";
+            xmlhttp.open('GET', loopUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200)
+                log(loopUri);      
+        }
+
+        function stop() {
+            xmlhttp.open('GET', stopUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200)
+                log(stopUri);      
+        }
+
+        function get_sequence() {
+            if (sequence != null)
+                return;
+            xmlhttp.open('GET', sequenceUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200) {
+                sequence = eval("("+xmlhttp.responseText+")");
+                log(xmlhttp.responseText);      
+            }
+            update_sequence_div(sequence);
+        }
+        function put_sequence(arrayStr) {
+            xmlhttp.open('POST', sequenceUri, false); 
+            send = arrayStr; //"[" + window.sequence.join(",") + "]";
+            xmlhttp.send(send);
+            alert("sending"+arrayStr);
+            if(xmlhttp.status == 200) {
+                log(xmlhttp.responseText);      
+            }
+        }
+
+        function get_patterns() {
+            if (patterns != null)
+                return;
+            xmlhttp.open('GET', patternsUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200) {
+                patterns = eval("("+xmlhttp.responseText+")");
+                //log(xmlhttp.responseText);      
+                update_patterns_div(patterns);
+            }
+        }
+        function put_patterns(value) {
+            xmlhttp.open('POST', patternsUri, false); 
+            jsonSerial = JSON.stringify(patterns); 
+            log(jsonSerial);
+            xmlhttp.send("{'patterns':"+jsonSerial+"}");
+        }
+
+        function get_instruments() {
+            xmlhttp.open('GET', instrumentsUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200) {
+                instruments = eval("("+xmlhttp.responseText+")");
+                update_instruments_div(instruments);
+                //log(xmlhttp.responseText);      
+            }
+        }
+        function put_instruments(value) {
+            xmlhttp.open('POST', instrumentsUri, false); 
+            jsonSerial = JSON.stringify(instruments); 
+            log(jsonSerial);
+            xmlhttp.send("{'instruments':"+jsonSerial+"}");
+        }
+
+        /*function get_global_vol() {
+            xmlhttp.open('GET', globalVolUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200) {
+                globalVol = eval("("+xmlhttp.responseText+")");
+                log(xmlhttp.responseText);      
+                document.getElementById('globalVol').value = globalVol.global_volume;
+            }
+        }
+
+        function put_global_vol(value) {
+            xmlhttp.open('POST', globalVolUri, false); 
+            xmlhttp.send(value);
+            if(xmlhttp.status == 200) {
+                document.getElementById('globalVol').value = value
+                log(xmlhttp.responseText);      
+            }
+        }
+
+        function global_vol_down() {
+            newvol = document.getElementById('globalVol').value - 1;
+            put_global_vol(newvol);
+        }
+
+        function global_vol_up() {
+            newvol = document.getElementById('globalVol').value - 1 + 2;
+            put_global_vol(newvol);
+        } */
+
+
+        function log(str) {
+            console.log(str);
+        }
+
+        function update_sequence_div(sequence) {
+            var seqdiv = document.getElementById('sequence'),
+                seqol,
+                li,
+                row,
+                inp;
+
+            // javascript and closures and scope can stick it's self up it's stupid fucking arse.
+            // This works so I'm sticking with it now.
+            var update = (function (e) {window.sequence = eval('['+inp.value+']'); put_sequence('['+inp.value+']');});
+            inp = document.createElement('input');
+            inp.type = 'text';
+            inp.value = sequence;
+            inp.onchange = update;
+            seqdiv.appendChild(inp);
+
+
+        }
+
+        function showPattern(patternId) {
+            var pattsdiv = document.getElementById('patterns');
+            console.log("showing pattern " + patternId);
+            for (i in pattsdiv.childNodes) {
+                if (patterns.hasOwnProperty(i)) {
+                    node = pattsdiv.childNodes[i];
+                    //log(node);
+                    if (node.nodeName=="TABLE") {
+                        if (node.id==patternId) {
+                            node.setAttribute('style','display:block');
+                        }
+                        else {
+                            node.setAttribute('style','display:none');
+                        }
+
+                    }
+                }
+            }
+        }
+
+        function loopPattern (patNo) {
+            loopPatternNo = patNo;
+            loopPatternPlay(patNo); 
+            console.log(patNo);
+        }
+
+        function update_instruments_div(instruments) {
+            var instselector = document.getElementById('instrumentSelectors'),
+                instDiv = document.getElementById('instruments'),
+                i = null,
+                instSpan,
+                instView,
+                instLink,
+                instText;
+
+            if (modglobals == null) {
+                load();
+            }
+            for (i in instruments) {
+                if (instruments.hasOwnProperty(i)) {
+                    instSpan = document.createElement('span');
+                    instSpan.innerHTML = 'instrument '+i;
+                    instLink = document.createElement('span');
+                    instLink.setAttribute("class", "instSelector");
+                    instText = document.createElement("span");
+                    instText.innerHTML = "instrument " + i;
+                    instText.setAttribute("onclick", "showInstrument('instrumentData_"+i+"')");
+                    instLink.appendChild(instText);
+
+                    instselector.appendChild(instLink);
+                    instDiv.appendChild(instSpan);
+                }
+            }
+        }
+
+        function update_patterns_div(patterns) {
+            var patselector = document.getElementById('patternSelectors'),
+                pattsdiv = document.getElementById('patterns'),
+                i = null,
+                patdiv,
+                patspan,
+                chan,
+                row,
+                ta,
+                tr,
+                td,
+                patLink,
+                patText,
+                patPlay;
+
+            if (modglobals == null) {
+                load();
+            }
+            for (i in patterns) {
+                if (patterns.hasOwnProperty(i)) {
+                    patspan = document.createElement('span');
+                    patspan.innerHTML = 'pattern '+i;
+                    pattab = document.createElement('table');
+                    pattab.appendChild(patspan);
+                    pattab.setAttribute("style", "display:none");
+                    pattab.setAttribute("id", "patternData_"+i);
+                    patLink = document.createElement('span');
+                    patLink.setAttribute("class", "patternSelector");
+                    patText = document.createElement("span");
+                    patText.innerHTML = "pattern " + i;
+                    patText.setAttribute("onclick", "showPattern('patternData_"+i+"')");
+                    patPlay = document.createElement("span");
+                    patPlay.innerHTML = " &gt; ";
+                    patPlay.setAttribute("onclick", "loopPattern('"+i+"')");
+                    patPlay.setAttribute("onhover", "loopPattern('"+i+"')");
+                    patLink.appendChild(patText);
+                    patLink.appendChild(patPlay);
+
+                    //patLink.innerHTML = "pattern "+i;
+                    //patLink.setAttribute("onclick", "showPattern('patternData_"+i+"')");
+
+                    for (row = 0; row < patterns[i].numRows; row += 1) {
+                        tr = document.createElement('tr');
+                        for (chan = 0; chan < modglobals.numChannels; chan += 1) { 
+                            td = getRow(i, patterns[i].data, row, chan, modglobals.numChannels);
+                            td.id = "cell_"+ i + "_" + row + "_" + chan;
+                            td.onchange = noteChange;
+                            tr.appendChild(td);
+                        }
+                        pattab.appendChild(tr);
+                    }
+                    patselector.appendChild(patLink);
+                    pattsdiv.appendChild(pattab);
+                }
+            }
+        }
+
+        function getRow(patno, pattern, rowNum, chanNum, numChannels) {
+            var chans = null,
+                res = "",
+                count = 0,
+                i = 0,
+                row = null,
+                td = document.createElement('td'),
+                note = document.createElement('input'),
+                inst = document.createElement('input'),
+                vol = document.createElement('input'),
+                eff = document.createElement('input'),
+                effval = document.createElement('input');
+
+
+            //row = pattern.slice(row, numChannels + row);
+            rowidx = (rowNum * numChannels) + chanNum;
+            row = pattern[rowidx];
+
+            //td.setAttribute('onChange', "noteChange(window.event, " + patno + ", " + chanNum + ", " + rowidx + ");");
+            //td.setAttribute('onChange', "noteChange();");
+
+            note.type = 'type';
+            note.size = 3;
+            note.value = getNote(row);
+            note.className = 'note';
+
+            inst.type = 'type';
+            inst.size = 2;
+            inst.value = getInst(row);
+            inst.className = 'inst';
+
+            vol.type = 'type';
+            vol.size = 3;
+            vol.value = getVol(row);
+            vol.className = 'vol';
+
+            eff.type = 'type';
+            eff.size = 1;
+            eff.value = getEff(row);
+            eff.className = 'eff';
+
+            effval.type = 'type';
+            effval.size = 2;
+            effval.value = getEffVal(row);
+            effval.className = 'effval';
+
+            td.appendChild(note);
+            td.appendChild(inst);
+            td.appendChild(vol);
+            td.appendChild(eff);
+            td.appendChild(effval);
+
+            return td;
+        }
+
+        function getChannel(pattern, chan) {
+            var chans = null,
+                res = "",
+                count = 0,
+                i = 0;
+
+            for (i = 0; i < pattern.length; i += 1) {
+
+                row = pattern[i][chan];
+                res += getNote(row);
+                res += " ";
+                res += getInst(row);
+                res += " ";
+                res += getVol(row);
+                res += " ";
+                res += getEff(row);
+                res += getEffVal(row);
+                
+                res += "\n";
+            }
+            log(chan);
+            log(res);
+            return res;
+        }
+
+        function getNote(row) {
+            var int = row[0],
+                ret = "";
+            if (int == 97) {
+                return "---";
+            }
+            ret += NOTES[int % 12];
+            ret += Math.floor(int / 12);
+            return ret;
+        }
+        function getInst(row) {
+            return rightjustify(row[1].toString(16), 2);
+        }
+        function getVol(row) {
+            return rightjustify(row[2], 3);
+        }
+            
+        function rightjustify(value, places) {
+            var ret = "";
+            ret = value + "";
+            if (ret.length < 2) {
+                ret = "." + ret;
+            }
+            if (ret.length < 3) {
+                ret = "." + ret;
+            }
+            return ret.substring(3 - places);
+        }
+        function getEff(row) {
+            return row[3];
+        }
+        function getEffVal(row) {
+            var int = row[4],
+                ret = "";
+            ret = int + "";
+            if (ret.length < 2) {
+                ret = "0" + ret;
+            }
+            return ret;
+        }
+
+        function totalChannels(patterns) {
+            // TODO: do some work here to get the acutal number of channels.
+            return 6;
+        }
+
+        var NOTES = ["..", "C-", "C#", "D-", "D#", "E-", "F-","F#", "G-", "G#", "A-", "A#", "B-"];
+
+        //function noteChange (val, pat, row, chan) {
+        function noteChange (evt) {
+            var bits, pat, row, chan, dataidx, celldiv;
+
+            evt = evt || window.event;
+            log(evt);
+            bits = evt.currentTarget.id.split('_');
+            pat = bits[1];
+            row = bits[2];
+            chan = bits[3];
+            //celldiv = document.getElementById(evt.currentTarget.id),
+            dataidx = parseInt((row * patterns[pat].numRows) + chan);
+
+            if (evt.target.className == "note") {
+                patterns[pat].data[dataidx][0] = evt.target.value.replace(".","");
+            }
+            if (evt.target.className == "inst") {
+                patterns[pat].data[dataidx][1] = parseInt(evt.target.value.replace(".",""));
+            }
+            if (evt.target.className == "vol") {
+                patterns[pat].data[dataidx][2] = parseInt(evt.target.value.replace(".",""));
+            }
+            if (evt.target.className == "type") {
+                patterns[pat].data[dataidx][3] = parseInt(evt.target.value.replace(".",""));
+            }
+            if (evt.target.className == "effval") {
+                patterns[pat].data[dataidx][4] = parseInt(evt.target.value.replace(".",""));
+            }
+            put_pattern(pat, patterns[pat]);
+            
+            //log(pat + " " + row + " " + chan);
+            //log(window.event);
+            //log(val);
+        }
+
+        function put_pattern(pat, value) {
+            xmlhttp.open('POST', patternUri+"/"+pat, false); 
+            log(value);
+            xmlhttp.send(JSON.stringify(value));
+            if(xmlhttp.status == 200) {
+                log(xmlhttp.responseText);      
+            }
+
+            //jsonSerial = JSON.stringify(patterns); 
+            //xmlhttp.send(value);
+
+            //send = arrayStr; //"[" + window.sequence.join(",") + "]";
+            //xmlhttp.send(send);
+            //alert("sending"+arrayStr);
+        }
+</script>
+    <body onLoad="init();"> 
+        tune: 
+        <!--input id='tuneUri' type="text" size="25" value="file:///home/richard/my_code/drainpipe/drainpipe_theme/drainpipe_theme.xm"--> 
+        <input id='tuneUri' type="text" size="25" value="http://neuralyte.org/~trix/KingCNUT_test3.xm"> 
+        <span class='but' onClick='load();'>load</span> <span class='but' onClick='get_jsong();'>download as jsong</span><br/>
+
+
+        <span id='songControls'>
+        <span class='but' onClick='play();'>play</span>
+        <span class='but' onClick='restart();'>restart</span>
+        <span class='but' onClick='stop();'>stop</span><br/><br/>
+        <!-- <span class='but' onClick='get_global_vol();'>get_global_vol</span>
+        <input id='globalVol' type="text" size="2" value="??">
+        <span class='but' onClick='global_vol_up();'>vol_up</span>
+        <span class='but' onClick='global_vol_down();'>vol_down</span> -->
+        <span class='but' onClick='get_sequence();'>get_sequence</span>
+        <!--<span class='but' onClick='put_sequence();'>put_sequence</span>-->
+        <span class='but' onClick='get_patterns();'>get_patterns</span>
+        <!--<span class='but' onClick='put_patterns();'>put_patterns</span>-->
+        <span class='but' onClick='get_instruments();'>get_instruments</span>
+        <span id='sequence'/>
+        <div id='patternSelectors'></div>
+        <div id='patterns'></div>
+        <div id='instrumentSelectors'></div>
+        <div id='instruments'></div>
+        </span>
+
+        <h2>Doc</h2>
+
+        The source is the documentation. 
+
+        I couldn't get a webserver configured to serve static pages so i've hacked it to lookup this page.<p/>
+        Currently supported endpoints - all assume /drainpipe/&lt;encoded uri to mod&gt;/
+
+        <table>
+            <tr><th>name</th><th>GET</th><th>POST</th><th>CREATE</th><th>DELETE</th><th>notes</th></tr>
+            <tr><td>play</td><td>X</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>restart</td><td>X</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>stop</td><td>X</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>global_volume</td><td>X</td><td>X</td><td></td><td></td><td>This is a setup value for the mod. If you alter this value, you need to restart the tune to hear the effect.</td></tr>
+            <tr><td>sequence</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
+            <tr><td>patterns</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
+            <tr><td>instruments</td><td>X</td><td>TODO</td><td></td><td></td><td></td></tr>
+            <tr><td>samples</td><td>X</td><td>TODO</td><td></td><td></td><td>Samples included in instruments.</td></tr>
+
+        </table>
+
+        <h3>END DOC</h3>
+
+        <h3>FAQ</h3>
+        
+        <h4>Q: I know this, it's unix!</h4>
+        A: No, it isn't. It is CU/NT.
+
+		...
+
+    </body>
+</html>
