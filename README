@@ -1,0 +1,43 @@
+
+This is the README for 'Neuralyte Tracker'
+
+-- Overview -- 
+
+Neuralyte Tracker is a tracker. The rendering engine is provided by IBXM.
+Grizzly and Jersey are employed to provide a RESTful interface. The interface
+is written in HTML/JS. Net.sf.json provides json utility functions.
+
+Given the interface is written in HTML/JS, and rendered in a web browser, you
+may wish to redirect the audio output at the internet. This operating mode is
+referred to as 'cloud utility' mode. 
+
+Cloud utility mode does not require any modification to staring Neuralyte
+Tacker - to enable cloud utility mode you fiddle with pulseaudio and do the
+network streaming at that level. If you see mention of pulseaudio, parec,
+oggenc it is talking about cloud utility mode and can be ignored for a basic
+operating mode.
+
+Basic operating mode is when you are running Neuralyte Tracker on a machine
+that has audio out and is within ear-shot.
+
+
+-- Getting started --
+
+To get working, you should install linux, cd into this directory, and then:
+  mvn assembly:assembly
+
+then
+  ./run_neuralyte_tracker.sh
+
+then point your browser at (for basic operating mode):
+  http://localhost:8888/drainpipe
+
+
+-- Documentation --
+
+Currently, the code is the documentation.
+
+
+-- Roadmap --
+
++ jsong peristance.
