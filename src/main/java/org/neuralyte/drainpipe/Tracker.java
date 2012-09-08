@@ -1,0 +1,178 @@
+/*
+    Project Drainpipe: A RESTful sound tracker
+    Copyright (C) 2012  Richard Henwood rjhenwod@yahoo.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neuralyte.drainpipe;
+
+//import ibxm.IBXM;
+import ibxm.Instrument;
+import ibxm.Module;
+import ibxm.Player;
+
+//import java.io.File;
+//import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Vector;
+
+import javax.sound.sampled.LineUnavailableException;
+
+//import javax.sound.sampled.LineUnavailableException;
+
+public class Tracker implements Runnable {
+
+	final int SAMPLE_RATE = 44100;
+//	public static ibxm.Player player;
+	private URL songFile = null;
+	private int interpolation, duration, samplePos;
+    //private IBXM ibxm;
+	private Player player;
+	
+   // private JList instrumentList;
+
+	//private String outfile = null;
+
+
+	// Private constructor prevents instantiation from other classes
+	private Tracker() {
+		System.out.println("this shouldn't be caled.");
+		/*try {
+			player = new ibxm.Player();
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
+		}*/
+	}
+
+	/**
+	 * SingletonHolder is loaded on the first execution of Singleton.getInstance() 
+	 * or the first access to SingletonHolder.INSTANCE, not before.
+	 */
+	private static class SingletonHolder { 
+		public static final Tracker INSTANCE = new Tracker();
+	}
+
+	public static Tracker getInstance() {
+		return SingletonHolder.INSTANCE;
+	}
+
+	public void play () {
+		player.play();
+	}
+
+	public void playPattern (int patNo) {
+		player.playPattern(patNo);
+	}
+
+	
+	public String getSongName () throws IOException {
+		String path = "Unknown!";
+		path = this.songFile.getPath();
+		return path;
+	}
+
+	public void loadModule( URL modfile ) throws IOException {
+		this.songFile = modfile;
+		System.out.println("loading mod: " + songFile);		
+		
+		URLConnection con = modfile.openConnection();
+		con.connect();
+		System.out.println("content length: " + con.getContentLength());
+		byte[] moduleData = new byte[con.getContentLength()];
+		
+		InputStream in = con.getInputStream();
+		DataInputStream modStream = new DataInputStream(in);
+		
+		modStream.readFully(moduleData);
+		
+		in.close();
+		
+        Module module = new Module( moduleData );
+        try {
+			player = new Player(SAMPLE_RATE);
+			player.setInterpolation(interpolation);
+			player.loadModule(module);
+        //ibxm = new IBXM( module, SAMPLE_RATE );
+        //ibxm.setInterpolation( interpolation );
+			duration = player.calculateSongDuration();
+			samplePos = 0;
+        /*seekSlider.setMinimum( 0 );
+        seekSlider.setMaximum( duration );
+        seekSlider.setValue( 0 );
+        songLabel.setText( module.songName.trim() );*/
+  /*      Vector<String> vector = new Vector<String>();
+        Instrument[] instruments = module.instruments;
+        for( int idx = 0, len = instruments.length; idx < len; idx++ ) {
+                String name = instruments[ idx ].name;
+                if( name.trim().length() > 0 )
+                        vector.add( String.format( "%03d: %s", idx, name ) );
+        }
+        instrumentList.setListData( vector );
+*/
+		
+		
+//		player.setModule( ibxm.Player.loadModule( urlfs ) );
+		//urlfs.close();
+        
+		} catch (LineUnavailableException e) {
+			System.out.println("can't start player.");
+			e.printStackTrace();
+		}
+	}
+	
+	public Player getPlayer() {
+		return player;
+	}
+	
+    public synchronized void stop() {
+    	player.stop();
+  /*      playing = false;
+        try {
+                if( playThread != null ) playThread.join();
+        } catch( InterruptedException e ) {
+        }*/
+ /*       updateTimer.stop();
+        playButton.setText( "Play" );*/
+}
+
+private synchronized void seek( int pos ) {
+        samplePos = player.seek( pos );
+}
+
+private synchronized void setInterpolation( int interpolation ) {
+        this.interpolation = interpolation;
+        if( player != null ) player.setInterpolation( interpolation );
+}
+
+	public void restart() {
+		this.seek(0);
+		//player.restart();
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
