@@ -37,6 +37,14 @@ then point your browser at (for basic operating mode):
 
 Currently, the code is the documentation.
 
+-- Developers --
+
+If you fancy having a poke around, I suggest using Eclipse. Before you 'import'
+a maven project, enter this directory and run:
+  mvn eclipse:eclipse
+
+
+
 
 -- Roadmap --
 
