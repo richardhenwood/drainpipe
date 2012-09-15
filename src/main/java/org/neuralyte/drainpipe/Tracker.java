@@ -24,16 +24,23 @@ import ibxm.Player;
 
 //import java.io.File;
 //import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Enumeration;
 import java.util.Vector;
+import java.util.zip.*;
 
 import javax.sound.sampled.LineUnavailableException;
 
@@ -55,7 +62,7 @@ public class Tracker implements Runnable {
 
 	// Private constructor prevents instantiation from other classes
 	private Tracker() {
-		System.out.println("this shouldn't be caled.");
+		//System.out.println("this shouldn't be caled.");
 		/*try {
 			player = new ibxm.Player();
 		} catch (LineUnavailableException e) {
@@ -97,12 +104,48 @@ public class Tracker implements Runnable {
 		URLConnection con = modfile.openConnection();
 		con.connect();
 		System.out.println("content length: " + con.getContentLength());
-		byte[] moduleData = new byte[con.getContentLength()];
+		
 		
 		InputStream in = con.getInputStream();
-		DataInputStream modStream = new DataInputStream(in);
+		DataInputStream modStream = null;
 		
-		modStream.readFully(moduleData);
+		if (con.getContentType().equals("application/zip")) {
+			System.out.println("Zip file found. Loading the first thing I can find.");
+			File tmpzip = File.createTempFile("modarchive", ".zip");
+			FileOutputStream fos = new FileOutputStream(tmpzip);
+			DataInputStream zipStream = new DataInputStream(in);
+			byte b = zipStream.readByte();
+			try {
+				while (true) {
+					fos.write(b);
+					b = zipStream.readByte();
+				}
+			}
+			catch (EOFException ex) {
+				System.out.println("Zip now local:" + tmpzip.getAbsolutePath());
+			}
+			ZipFile zipmod = new ZipFile(tmpzip);
+			System.out.println("entry: " + zipmod.entries().nextElement().getName());
+			in = zipmod.getInputStream(zipmod.getEntry(zipmod.entries().nextElement().getName()));	
+			//moduleData = new 
+		}
+		
+		//byte[] moduleData = new byte[con.getContentLength()];
+		//else {
+			modStream = new DataInputStream(in);
+		//}
+			
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		// lets only allow mods of < 10 MB to load.
+		byte[] moduleData = new byte[10485760];// IOUtils.toByteArray(in);// modStream.readByte();
+		int nRead;
+		while ((nRead = in.read(moduleData, 0, moduleData.length)) != -1) {
+			  buffer.write(moduleData, 0, nRead);
+		}
+		buffer.flush();
+		
+		moduleData = buffer.toByteArray();
+		//modStream.readFully(moduleData);
 		
 		in.close();
 		
@@ -174,5 +217,4 @@ private synchronized void setInterpolation( int interpolation ) {
 		// TODO Auto-generated method stub
 		
 	}
-
-}
+	}
