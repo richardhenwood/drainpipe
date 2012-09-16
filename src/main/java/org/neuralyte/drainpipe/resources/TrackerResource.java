@@ -315,38 +315,19 @@ public class TrackerResource {
     @Produces("application/json")
     public String jsong(@PathParam("songname") String songName) {
 
-    	//Tracker tracker = Tracker.getInstance();
+    	Object module = tracker.getPlayer().getModule();
     	
-    	/*
-    	Object[] globals = tracker.get_module().get_globals();
-    	JSONArray json = JSONArray.fromObject(globals);
-    	String globalsJson = json.toString();
-    	
-    	Object[] inst = tracker.get_module().get_instruments();
-    	json = JSONArray.fromObject(inst);
-    	String instrumentJson = json.toString();
-    	
-       	Object[] pat = tracker.get_module().get_patterns();
-    	json = JSONArray.fromObject(pat);
-    	String patternJson = json.toString();
-    	
+    	JSONArray json = JSONArray.fromObject(module, jsonConfig);
+    	String out = json.toString();
+    	return out;
 
-    	int[] seq = tracker.get_module().get_sequence();
-    	String out = "[";
-    	for (int i = 0; i < seq.length - 1; i++) {
-    		out += seq[i] + "," ;
-    	}
-    	out += seq[seq.length - 1];
-    	
-    	String sequenceJson = "{\"sequence\": " + out + "]}";
-    	*/
-    	return "massive regression: this isn't supported now";
-    	/*return "{\"globals\": " + globalsJson + "," +
-    			"\"patterns\": " + patternJson + "," +
-    			"\"sequence\": " + sequenceJson + "," +
-    			"\"instruments\": " + instrumentJson +
-    			"}";*/
+//    	return "massive regression: this isn't supported now";
     }
     
+    @POST @Path("{songname}/save")
+    @Produces("application/json")
+    public String save(@PathParam("songname") String songName, String incomingJson) {
+    	return "not suppported yet";
+    }
     
 }
