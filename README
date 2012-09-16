@@ -42,6 +42,7 @@ Currently, the code is the documentation.
 If you fancy having a poke around, I suggest using Eclipse. Before you 'import'
 a maven project, enter this directory and run:
   mvn eclipse:eclipse
+  mvn assembly:assembly
 
 
 
