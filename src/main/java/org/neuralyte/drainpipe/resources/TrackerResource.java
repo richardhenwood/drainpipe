@@ -26,8 +26,11 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Arrays;
@@ -68,11 +71,11 @@ public class TrackerResource {
 			this.jsonConfig.setIgnorePublicFields(false);
 			this.jsonConfig.setJsonPropertyFilter( new PropertyFilter(){
 				public boolean apply( Object source, String name, Object value ) {
-			         if( "instruments".equals( name ) || 
+			         /*if( "instruments".equals( name ) || 
 			        		 "patterns".equals( name ) ||
 			        		 "sequence".equals( name) ){
 			             return true;
-			          }
+			          }*/
 			          return false;
 				}
 				//public void setProperty(Object o, String string, Object o1) {
@@ -324,10 +327,53 @@ public class TrackerResource {
 //    	return "massive regression: this isn't supported now";
     }
     
+    @GET @Path("{songname}/save")
+    @Produces("application/json")
+    public String save(@PathParam("songname") String songName) {
+    	Object module = tracker.getPlayer().getModule();
+    	
+    	JSONArray json = JSONArray.fromObject(module, jsonConfig);
+    	try {
+    		URL url = new URL("http://drainpipe.iriscouch.com/");
+    		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    		conn.setDoOutput(true);
+    		conn.setRequestMethod("POST");
+    		conn.setRequestProperty("Content-Type", "application/json");
+    		
+    		OutputStream os = conn.getOutputStream();
+    		os.write(json.toString().getBytes());
+    		os.flush();
+     
+    		if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+    			throw new RuntimeException("Failed : HTTP error code : "
+    				+ conn.getResponseCode());
+    		}
+     
+    		BufferedReader br = new BufferedReader(new InputStreamReader(
+    				(conn.getInputStream())));
+     
+    		String output;
+    		System.out.println("Output from Server .... \n");
+    		while ((output = br.readLine()) != null) {
+    			System.out.println(output);
+    		}
+    		
+    		conn.disconnect();
+    	} catch (MalformedURLException e) {
+
+    		e.printStackTrace();
+
+    	} catch (IOException e) {
+
+    		e.printStackTrace();
+
+    	}
+    	    	return "output";
+    }
+
     @POST @Path("{songname}/save")
     @Produces("application/json")
     public String save(@PathParam("songname") String songName, String incomingJson) {
     	return "not suppported yet";
     }
-    
 }

@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <html>
+    <meta charset="UTF-8">
     <style type="text/css">
         #patterns table {
             border: 10px;
@@ -76,6 +77,7 @@
         var playUri;
         var restartUri;
         var stopUri;
+        var saveUri;
    //     var globalVolUri;
         var sequenceUri;
         var patternUri;
@@ -101,10 +103,12 @@
 
         function initAPI() {
             var tuneUri = document.getElementById('tuneUri').value;
+            //var saveUri = document.getElementById('saveUri').value;
             var codedUri = encodeURIComponent(tuneUri);
             loadUri = document.location.href + "/" + codedUri + "";
             jsongUri = document.location.href + "/" + codedUri + "/jsong";
 
+            saveUri = document.location.href + "/" + codedUri + "/save";
             playUri = document.location.href + "/" + codedUri + "/play";
             // loopPatternUri is a dogs dinner:
             loopPatternUri = document.location.href + "/" + codedUri + "/pattern/";
@@ -131,6 +135,14 @@
             xmlhttp.send(null);
             if(xmlhttp.status == 200)
                 log(loadUri);      
+                modglobals = eval("("+xmlhttp.responseText+")");
+        }
+
+        function save() {
+            xmlhttp.open('GET', saveUri, false); 
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200)
+                log(saveUri);      
                 modglobals = eval("("+xmlhttp.responseText+")");
         }
 
@@ -564,29 +576,32 @@
 </script>
     <body onLoad="init();"> 
         tune: 
-        <!--input id='tuneUri' type="text" size="25" value="file:///home/richard/my_code/drainpipe/drainpipe_theme/drainpipe_theme.xm"--> 
-        <input id='tuneUri' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=35128#bam-vfh.xm"> 
-        <span class='but' onClick='load();'>load</span> <span class='but' onClick='get_jsong();'>download as jsong</span><br/>
+        <input id='tuneUri' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"> 
+        <span class='but' onClick='load();'>load</span> 
+        <span class='but' onClick='get_jsong();'>download as jsong</span>
+        save:
+        <input id='saveUri' type="text" size="35" value="hard coded in the the server."> 
+        <span class='but' onClick='save();'>save</span><br/>
 
 
         <span id='songControls'>
-        <span class='but' onClick='play();'>play</span>
-        <span class='but' onClick='restart();'>restart</span>
-        <span class='but' onClick='stop();'>stop</span><br/><br/>
-        <!-- <span class='but' onClick='get_global_vol();'>get_global_vol</span>
-        <input id='globalVol' type="text" size="2" value="??">
-        <span class='but' onClick='global_vol_up();'>vol_up</span>
-        <span class='but' onClick='global_vol_down();'>vol_down</span> -->
-        <span class='but' onClick='get_sequence();'>get_sequence</span>
-        <!--<span class='but' onClick='put_sequence();'>put_sequence</span>-->
-        <span class='but' onClick='get_patterns();'>get_patterns</span>
-        <!--<span class='but' onClick='put_patterns();'>put_patterns</span>-->
-        <span class='but' onClick='get_instruments();'>get_instruments</span>
-        <span id='sequence'/>
-        <div id='patternSelectors'></div>
-        <div id='patterns'></div>
-        <div id='instrumentSelectors'></div>
-        <div id='instruments'></div>
+            <span class='but' onClick='play();'>play</span>
+            <span class='but' onClick='restart();'>restart</span>
+            <span class='but' onClick='stop();'>stop</span><br/><br/>
+            <!-- <span class='but' onClick='get_global_vol();'>get_global_vol</span>
+            <input id='globalVol' type="text" size="2" value="??">
+            <span class='but' onClick='global_vol_up();'>vol_up</span>
+            <span class='but' onClick='global_vol_down();'>vol_down</span> -->
+            <span class='but' onClick='get_sequence();'>get_sequence</span>
+            <!--<span class='but' onClick='put_sequence();'>put_sequence</span>-->
+            <span class='but' onClick='get_patterns();'>get_patterns</span>
+            <!--<span class='but' onClick='put_patterns();'>put_patterns</span>-->
+            <span class='but' onClick='get_instruments();'>get_instruments</span>
+            <span id='sequence'/>
+            <div id='patternSelectors'></div>
+            <div id='patterns'></div>
+            <div id='instrumentSelectors'></div>
+            <div id='instruments'></div>
         </span>
 
         <h2>Doc</h2>
