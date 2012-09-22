@@ -332,9 +332,10 @@ public class TrackerResource {
     public String save(@PathParam("songname") String songName) {
     	Object module = tracker.getPlayer().getModule();
     	
-    	JSONArray json = JSONArray.fromObject(module, jsonConfig);
+    	//JSONArray json = JSONArray.fromObject(module, jsonConfig);
+    	JSONObject json = JSONObject.fromObject(module, jsonConfig);
     	try {
-    		URL url = new URL("http://drainpipe.iriscouch.com/");
+    		URL url = new URL("http://drainpipe.iriscouch.com/mods");
     		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     		conn.setDoOutput(true);
     		conn.setRequestMethod("POST");
@@ -346,7 +347,7 @@ public class TrackerResource {
      
     		if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
     			throw new RuntimeException("Failed : HTTP error code : "
-    				+ conn.getResponseCode());
+    				+ conn.getResponseCode() + conn.getResponseMessage());
     		}
      
     		BufferedReader br = new BufferedReader(new InputStreamReader(
