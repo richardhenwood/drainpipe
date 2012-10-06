@@ -133,7 +133,7 @@ public class TrackerResource {
     	System.out.println(songName);
     	
     	tracker = Tracker.getInstance();
-    	tracker.loadModule(new URL(URLDecoder.decode(songName, "ISO-8859-1")));
+    	tracker.loadModule(new URL(URLDecoder.decode(songName, "ISO-8859-1")), jsonConfig);
 
     	Module mod = tracker.getPlayer().getModule();
     	JSONObject json = JSONObject.fromObject(mod, jsonConfig);
@@ -320,7 +320,7 @@ public class TrackerResource {
 
     	Object module = tracker.getPlayer().getModule();
     	
-    	JSONArray json = JSONArray.fromObject(module, jsonConfig);
+    	JSONObject json = JSONObject.fromObject(module, jsonConfig);
     	String out = json.toString();
     	return out;
 

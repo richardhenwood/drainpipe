@@ -44,6 +44,11 @@ import java.util.zip.*;
 
 import javax.sound.sampled.LineUnavailableException;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+import net.sf.json.JsonConfig;
+
 //import javax.sound.sampled.LineUnavailableException;
 
 public class Tracker implements Runnable {
@@ -97,13 +102,14 @@ public class Tracker implements Runnable {
 		return path;
 	}
 
-	public void loadModule( URL modfile ) throws IOException {
+	public void loadModule( URL modfile, JsonConfig jsonConfig ) throws IOException {
 		this.songFile = modfile;
 		System.out.println("loading mod: " + songFile);		
 		
 		URLConnection con = modfile.openConnection();
 		con.connect();
 		System.out.println("content length: " + con.getContentLength());
+		System.out.println("content type: " + con.getContentType());
 		
 		
 		InputStream in = con.getInputStream();
@@ -128,6 +134,34 @@ public class Tracker implements Runnable {
 			System.out.println("entry: " + zipmod.entries().nextElement().getName());
 			in = zipmod.getInputStream(zipmod.getEntry(zipmod.entries().nextElement().getName()));	
 			//moduleData = new 
+		}
+		else if (con.getContentType().equals("text/plain; charset=utf-8")) {
+			System.out.println("looks like we've got a jsong from couch db.");
+			String incomingJson = "";
+			String temp;
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			while ((temp = br.readLine()) != null) {
+				incomingJson += temp;
+			}
+			/*try {
+				while (true) {
+					incomingJson += br.readLine();//in.read();
+				}
+			}
+			catch (EOFException ex) {
+				System.out.println("loaded from doc store.");
+			}*/
+	    	JSONObject json = (JSONObject) JSONSerializer.toJSON( incomingJson );
+			try {
+				player = new Player(SAMPLE_RATE);
+			} catch (LineUnavailableException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			player.setInterpolation(interpolation);
+			Player obj = (Player) JSONSerializer.toJava(json, jsonConfig);
+			System.out.println(obj.toString());
+			
 		}
 		
 		//byte[] moduleData = new byte[con.getContentLength()];
