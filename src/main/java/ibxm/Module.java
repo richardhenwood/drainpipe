@@ -513,14 +513,16 @@ public class Module {
 		}
 	}
 
-	public void setSequence(Object[] a) {
-		int[] c = new int[a.length];
+	public void setSequence(int[] a) {
+		this.sequence = a;
+		/*int[] c = new int[a.length];
 		for(int i = 0; i < a.length; i++)
 		{
+			c[i] 
 		    c[i] = Integer.parseInt(a[i].toString());
 		}
 		
-		this.sequence = c;
+		this.sequence = c;*/
 	}
 
 	public void setPatterns(Pattern[] array) {

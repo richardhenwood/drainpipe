@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -208,15 +209,12 @@ public class TrackerResource {
     @POST @Path("{songname}/sequence")
     @Produces("application/json")
     public String sequence(@PathParam("songname") String songName, String incomingJson) {
-    	//int[] seq = null;
-    	//String[] strSeq = null;
-    	
-    	//Tracker tracker = Tracker.getInstance();
-    	//tracker.get_module().global_volume = Integer.parseInt(incomingJson);
     	
     	//incomingJson = incomingJson.substring(1, incomingJson.length() - 1);    	
-    	JSONArray json = (JSONArray) JSONSerializer.toJSON( incomingJson ); 
-    	tracker.getPlayer().getModule().setSequence(json.toArray());
+    	//JSONArray json = (JSONArray) JSONSerializer.toJSON( incomingJson ); 
+    	Gson gson = new Gson();
+    	int[] seq = gson.fromJson(incomingJson, int[].class);
+    	tracker.getPlayer().getModule().setSequence(seq);
     	
     	//JSONArray json = JSONArray.toArray(incomingJson);
     	
@@ -227,7 +225,7 @@ public class TrackerResource {
     	}
     	tracker.getPlayer().getModule().setSequence(seq);*/
     	System.out.println("sequence updated: " + Arrays.toString(tracker.getPlayer().getModule().getSequence()));
-    	return json.toString();
+    	return incomingJson.toString();
     	//return "{\"sequence\": " + incomingJson + "}";
     }
 
