@@ -27,7 +27,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -44,7 +43,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
-import net.sf.json.JSON;
+//import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
@@ -200,10 +199,10 @@ public class TrackerResource {
 
     	//Tracker tracker = Tracker.getInstance();
     	int[] seq = tracker.getPlayer().getModule().getSequence();
-
-    	JSONArray json = JSONArray.fromObject(seq, jsonConfig);
-    	String out = json.toString();
-    	return out;
+   	
+    	Gson gson = new Gson();
+    	String json = gson.toJson(seq);
+    	return json;
     }
     
     @POST @Path("{songname}/sequence")
