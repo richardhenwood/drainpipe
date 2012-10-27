@@ -32,10 +32,12 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
@@ -43,6 +45,11 @@ import java.util.Vector;
 import java.util.zip.*;
 
 import javax.sound.sampled.LineUnavailableException;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import com.google.gson.stream.JsonReader;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -143,25 +150,14 @@ public class Tracker implements Runnable {
 			while ((temp = br.readLine()) != null) {
 				incomingJson += temp;
 			}
-			/*try {
-				while (true) {
-					incomingJson += br.readLine();//in.read();
-				}
-			}
-			catch (EOFException ex) {
-				System.out.println("loaded from doc store.");
-			}*/
-	    	JSONObject json = (JSONObject) JSONSerializer.toJSON( incomingJson );
-			try {
-				player = new Player(SAMPLE_RATE);
-			} catch (LineUnavailableException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			player.setInterpolation(interpolation);
-			Player obj = (Player) JSONSerializer.toJava(json, jsonConfig);
-			System.out.println(obj.toString());
-			
+			Gson gson = new Gson();
+			Module mod = gson.fromJson(incomingJson, Module.class);
+			player = new Player(SAMPLE_RATE, mod);
+
+			this.duration = player.calculateSongDuration();
+			this.samplePos = 0;
+			System.out.println(player.toString());
+			return;
 		}
 		
 		//byte[] moduleData = new byte[con.getContentLength()];
@@ -184,9 +180,9 @@ public class Tracker implements Runnable {
 		in.close();
 		
         Module module = new Module( moduleData );
-        try {
+       // try {
 			player = new Player(SAMPLE_RATE);
-			player.setInterpolation(interpolation);
+			//player.setInterpolation(interpolation);
 			player.loadModule(module);
         //ibxm = new IBXM( module, SAMPLE_RATE );
         //ibxm.setInterpolation( interpolation );
@@ -210,10 +206,10 @@ public class Tracker implements Runnable {
 //		player.setModule( ibxm.Player.loadModule( urlfs ) );
 		//urlfs.close();
         
-		} catch (LineUnavailableException e) {
+		/*} catch (LineUnavailableException e) {
 			System.out.println("can't start player.");
 			e.printStackTrace();
-		}
+		}*/
 	}
 	
 	public Player getPlayer() {
@@ -235,10 +231,11 @@ private synchronized void seek( int pos ) {
         samplePos = player.seek( pos );
 }
 
+/*
 private synchronized void setInterpolation( int interpolation ) {
         this.interpolation = interpolation;
         if( player != null ) player.setInterpolation( interpolation );
-}
+}*/
 
 	public void restart() {
 		this.seek(0);
@@ -252,3 +249,9 @@ private synchronized void setInterpolation( int interpolation ) {
 		
 	}
 	}
+
+class PlayerInstanceCreator implements InstanceCreator<Player> {	
+	public Player createInstance(Type arg0) {
+		return new Player(44100);
+	}
+}

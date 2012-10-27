@@ -32,9 +32,9 @@ public class IBXM {
 		Initialise the replay to play the
 		specified Module at the specified sampling rate.
 	*/
-	public IBXM () {
+	/*public IBXM () {
 		System.out.println("IBXM stub");
-	}
+	}*/
 	
 	public IBXM ( Module module, int sampleRate ) {
 		setModule (module, sampleRate);

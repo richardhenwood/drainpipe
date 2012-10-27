@@ -4,6 +4,7 @@ package ibxm;
 
 public class Module {
 	public String songName = "Blank";
+	public final String moduleVerion = "1";
 	public int numChannels = 4, numInstruments = 1;
 	public int numPatterns = 1, sequenceLength = 1, restartPos = 0;
 	public int defaultGVol = 64, defaultSpeed = 6, defaultTempo = 125, c2Rate = Sample.C2_PAL, gain = 64;

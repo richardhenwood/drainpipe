@@ -54,6 +54,8 @@ import net.sf.json.util.PropertyFilter;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.neuralyte.drainpipe.Tracker;
 
+import com.google.gson.Gson;
+
 @Path("/drainpipe")
 public class TrackerResource {
 
@@ -330,17 +332,16 @@ public class TrackerResource {
     @GET @Path("{songname}/save")
     @Produces("application/json")
     public String save(@PathParam("songname") String songName) {
-    	Object module = tracker.getPlayer().getModule();
-    	
-    	//JSONArray json = JSONArray.fromObject(module, jsonConfig);
-    	JSONObject json = JSONObject.fromObject(module, jsonConfig);
+    	//Object module = tracker.getPlayer().getModule();
+    	Module module = tracker.getPlayer().getModule();
+    	Gson gson = new Gson();
+    	String json = gson.toJson(module);
     	try {
     		URL url = new URL("http://drainpipe.iriscouch.com/mods");
     		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     		conn.setDoOutput(true);
     		conn.setRequestMethod("POST");
     		conn.setRequestProperty("Content-Type", "application/json");
-    		
     		OutputStream os = conn.getOutputStream();
     		os.write(json.toString().getBytes());
     		os.flush();
@@ -369,9 +370,9 @@ public class TrackerResource {
     		e.printStackTrace();
 
     	}
-    	    	return "output";
+    	return("output");
     }
-
+    
     @POST @Path("{songname}/save")
     @Produces("application/json")
     public String save(@PathParam("songname") String songName, String incomingJson) {

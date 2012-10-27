@@ -51,6 +51,11 @@
         	<type>jar</type>
         	<scope>compile</scope>
         </dependency>
+        <dependency>
+        	<groupId>com.google.code.gson</groupId>
+        	<artifactId>gson</artifactId>
+        	<version>1.7.2</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

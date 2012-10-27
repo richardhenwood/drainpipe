@@ -17,14 +17,34 @@ public class Player {
 	/**
 		Instantiate a new Player.
 	*/
-	public Player(int sampleRate) throws LineUnavailableException {
+	public Player(int sampleRate) {
 		this.SAMPLERATE = sampleRate;
-		this.ibxm = new IBXM();
-		audioLine = AudioSystem.getSourceDataLine( new AudioFormat( this.SAMPLERATE, 16, 2, true, true ) );
+		//this.ibxm = null; //new IBXM();
+		try {
+			audioLine = AudioSystem.getSourceDataLine( new AudioFormat( this.SAMPLERATE, 16, 2, true, true ) );
+		} catch (LineUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public Player(int sampleRate, Module mod) {
+		this.SAMPLERATE = sampleRate;
+		this.ibxm = new IBXM(mod, sampleRate);
+		try {
+			audioLine = AudioSystem.getSourceDataLine( new AudioFormat( this.SAMPLERATE, 16, 2, true, true ) );
+		} catch (LineUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private Player() {
+		this(44100);		
 	}
 	
 	public void loadModule(Module mod) {
-		this.ibxm.setModule(mod, this.SAMPLERATE);
+		this.ibxm = new IBXM(mod, this.SAMPLERATE);
 	}
 
 	/**
@@ -131,7 +151,7 @@ public class Player {
 		}
 	}
 
-	public void setInterpolation(int interpolation) {
+	public void _setInterpolation(int interpolation) {
 		ibxm.setInterpolation(interpolation);
 		
 	}
