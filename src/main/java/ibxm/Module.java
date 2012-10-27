@@ -515,6 +515,7 @@ public class Module {
 
 	public void setSequence(int[] a) {
 		this.sequence = a;
+		this.sequenceLength = a.length;
 		/*int[] c = new int[a.length];
 		for(int i = 0; i < a.length; i++)
 		{
