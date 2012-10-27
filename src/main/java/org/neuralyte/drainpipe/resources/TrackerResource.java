@@ -18,6 +18,7 @@
 
 package org.neuralyte.drainpipe.resources;
 
+import ibxm.Instrument;
 import ibxm.Module;
 import ibxm.Pattern;
 
@@ -45,9 +46,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 //import net.sf.json.JSON;
-import net.sf.json.JSONArray;
+//import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
+//import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.PropertyFilter;
 
@@ -235,10 +236,13 @@ public class TrackerResource {
     public String patterns(@PathParam("songname") String songName) {
 
     	//Tracker tracker = Tracker.getInstance();
-    	Object[] pat = tracker.getPlayer().getModule().getPatterns();
-    	JSONArray json = JSONArray.fromObject(pat, jsonConfig);
-    	String out = json.toString();
-    	return out;
+    	Pattern[] pats = tracker.getPlayer().getModule().getPatterns();
+    	Gson gson = new Gson();
+    	String json = gson.toJson(pats);
+    	
+    	//JSONArray json = JSONArray.fromObject(pat, jsonConfig);
+    	//String out = json.toString();
+    	return json;
     }
 
     @GET @Path("{songname}/pattern/{patNo}/play")
@@ -306,11 +310,14 @@ public class TrackerResource {
     public String instruments(@PathParam("songname") String songName) {
 
     	//Tracker tracker = Tracker.getInstance();
-    	Object[] inst = tracker.getPlayer().getModule().getInstruments();
+    	Instrument[] insts = tracker.getPlayer().getModule().getInstruments();
     	//Object[] inst = tracker.get_module().get_instruments();
-    	JSONArray json = JSONArray.fromObject(inst, jsonConfig);
-    	String out = json.toString();
-    	return out;
+    	//JSONArray json = JSONArray.fromObject(inst, jsonConfig);
+    	//String out = json.toString();
+    	
+    	Gson gson = new Gson();
+    	String json = gson.toJson(insts);
+    	return json;
     }
     
     @GET @Path("{songname}/jsong")
