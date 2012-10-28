@@ -51,11 +51,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.google.gson.stream.JsonReader;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import net.sf.json.JsonConfig;
-
 //import javax.sound.sampled.LineUnavailableException;
 
 public class Tracker implements Runnable {
@@ -109,7 +104,7 @@ public class Tracker implements Runnable {
 		return path;
 	}
 
-	public void loadModule( URL modfile, JsonConfig jsonConfig ) throws IOException {
+	public void loadModule( URL modfile) throws IOException {
 		this.songFile = modfile;
 		System.out.println("loading mod: " + songFile);		
 		

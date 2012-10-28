@@ -47,10 +47,10 @@ import javax.ws.rs.core.Context;
 
 //import net.sf.json.JSON;
 //import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+//import net.sf.json.JSONObject;
 //import net.sf.json.JSONSerializer;
-import net.sf.json.JsonConfig;
-import net.sf.json.util.PropertyFilter;
+//import net.sf.json.JsonConfig;
+//import net.sf.json.util.PropertyFilter;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.neuralyte.drainpipe.Tracker;
@@ -62,23 +62,18 @@ public class TrackerResource {
 
 	@Context ServletConfig sc; 
 	String uiFileHTML = null;
-	private JsonConfig jsonConfig = null;
+	//private JsonConfig jsonConfig = null;
 	private static Tracker tracker = null;
 
 	   
 	public TrackerResource() {
-		if (this.jsonConfig == null) {
+		/*if (this.jsonConfig == null) {
 			System.out.println("initializing tracker");
 	
 			this.jsonConfig = new JsonConfig();
 			this.jsonConfig.setIgnorePublicFields(false);
 			this.jsonConfig.setJsonPropertyFilter( new PropertyFilter(){
 				public boolean apply( Object source, String name, Object value ) {
-			         /*if( "instruments".equals( name ) || 
-			        		 "patterns".equals( name ) ||
-			        		 "sequence".equals( name) ){
-			             return true;
-			          }*/
 			          return false;
 				}
 				//public void setProperty(Object o, String string, Object o1) {
@@ -91,7 +86,7 @@ public class TrackerResource {
 			        }
 			    }
 			});
-		}
+		}*/
 	}
 
     @GET 
@@ -136,12 +131,15 @@ public class TrackerResource {
     	System.out.println(songName);
     	
     	tracker = Tracker.getInstance();
-    	tracker.loadModule(new URL(URLDecoder.decode(songName, "ISO-8859-1")), jsonConfig);
+    	tracker.loadModule(new URL(URLDecoder.decode(songName, "ISO-8859-1")));
 
     	Module mod = tracker.getPlayer().getModule();
-    	JSONObject json = JSONObject.fromObject(mod, jsonConfig);
-    	String out = json.toString();
-    	return out;
+    	//JSONObject json = JSONObject.fromObject(mod, jsonConfig);
+    	//String out = json.toString();
+    	
+    	Gson gson = new Gson();
+    	String json = gson.toJson(mod);
+    	return json;
         //return "Hello world: " + songName;
     }
     
@@ -270,12 +268,15 @@ public class TrackerResource {
     public String pattern(@PathParam("songname") String songName, @PathParam("patNo") int patNo, String incomingJson) {
        	Tracker tracker = Tracker.getInstance();
     	    	
-    	JSONObject json = (JSONObject) JSONObject.fromObject( incomingJson, jsonConfig ); 
-    	Pattern pat = (Pattern)JSONObject.toBean(json, Pattern.class);
+    	//JSONObject json = (JSONObject) JSONObject.fromObject( incomingJson, jsonConfig ); 
+    	//Pattern pat = (Pattern)JSONObject.toBean(json, Pattern.class);
+    	
+    	Gson gson = new Gson();
+    	Pattern pat = gson.fromJson(incomingJson, Pattern.class);
     	tracker.getPlayer().getModule().setPattern(pat);
     	
     	System.out.println("pattern updated: " + tracker.getPlayer().getModule().getPattern(patNo).toString());
-    	return json.toString();
+    	return pat.toString();
     }
     	
     @POST @Path("{songname}/patterns")
@@ -285,6 +286,11 @@ public class TrackerResource {
     	String[] strSeq = null;
     	//Tracker tracker = Tracker.getInstance();
     	
+    	Gson gson = new Gson();
+    	Pattern[] pats = gson.fromJson(incomingJson, Pattern[].class);
+    	tracker.getPlayer().getModule().setPatterns(pats);
+    	
+    	/*
     	JSONObject jsonObject = JSONObject.fromObject( incomingJson );
     	Object bean = JSONObject.toBean( jsonObject );
     	List patterns = null;
@@ -301,7 +307,7 @@ public class TrackerResource {
 		} catch (NoSuchMethodException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		} */
     	return "{\"sequence\": \"done\"}";
     }
     
@@ -324,11 +330,11 @@ public class TrackerResource {
     @Produces("application/json")
     public String jsong(@PathParam("songname") String songName) {
 
-    	Object module = tracker.getPlayer().getModule();
+    	Module module = tracker.getPlayer().getModule();
+    	Gson gson = new Gson();
+    	String json = gson.toJson(module);
     	
-    	JSONObject json = JSONObject.fromObject(module, jsonConfig);
-    	String out = json.toString();
-    	return out;
+    	return json;
 
 //    	return "massive regression: this isn't supported now";
     }
