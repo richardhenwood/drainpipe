@@ -38,6 +38,7 @@ public class IBXM {
 	
 	public IBXM ( Module module, int sampleRate ) {
 		setModule (module, sampleRate);
+		//module.registerSequenceListener(this);
 	}
 	
 /*	public _IBXM( Module module, int sampleRate ) {
@@ -349,5 +350,9 @@ public class IBXM {
 
 	public void setLoopPattern(boolean b) {
 		this.loopPattern = b;
+	}
+
+	public int getSeqpos() {
+		return seqPos;
 	}
 }

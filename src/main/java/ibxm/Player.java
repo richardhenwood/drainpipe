@@ -158,5 +158,11 @@ public class Player {
 
 	public int calculateSongDuration() {
 		return ibxm.calculateSongDuration();
+	}
+
+	public void setSequence(int[] pats) {
+		if (pats.length < this.ibxm.getSeqpos())
+			this.ibxm.setSequencePos(pats.length - 1);
+		this.getModule().setSequence(pats);
 	}	
 }

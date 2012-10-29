@@ -13,6 +13,7 @@ public class Module {
 	private int[] sequence = { 0 };
 	private Pattern[] patterns = { new Pattern( 4, 64, 0 ) };
 	private Instrument[] instruments = { new Instrument(), new Instrument() };
+	private IBXM listener;
 
 	private static final int[] keyToPeriod = {
 			29020, 27392, 25855, 24403, 23034, 21741, 20521,
@@ -542,5 +543,13 @@ public class Module {
 		// TODO Auto-generated method stub
 		
 	}
+	/*
+	public void registerSequenceListener(IBXM obj) {
+		this.listener = obj;
+	}
+	
+	public void fireNewSequence() {
+		this.listener.setSequence(this.sequence);
+	}*/
 	
 }

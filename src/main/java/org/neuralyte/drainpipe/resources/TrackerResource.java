@@ -213,7 +213,7 @@ public class TrackerResource {
     	//JSONArray json = (JSONArray) JSONSerializer.toJSON( incomingJson ); 
     	Gson gson = new Gson();
     	int[] seq = gson.fromJson(incomingJson, int[].class);
-    	tracker.getPlayer().getModule().setSequence(seq);
+    	tracker.getPlayer().setSequence(seq);
     	
     	//JSONArray json = JSONArray.toArray(incomingJson);
     	
@@ -290,24 +290,6 @@ public class TrackerResource {
     	Pattern[] pats = gson.fromJson(incomingJson, Pattern[].class);
     	tracker.getPlayer().getModule().setPatterns(pats);
     	
-    	/*
-    	JSONObject jsonObject = JSONObject.fromObject( incomingJson );
-    	Object bean = JSONObject.toBean( jsonObject );
-    	List patterns = null;
-    	try {
-			patterns = (List)PropertyUtils.getProperty( bean, "patterns" );
-			tracker.getPlayer().getModule().setPatterns((Pattern[]) patterns.toArray());
-			//System.out.println(patterns.toArray().toString());
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} */
     	return "{\"sequence\": \"done\"}";
     }
     
