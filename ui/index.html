@@ -98,6 +98,12 @@
             // init for ajax requests.
             xmlhttp = new XMLHttpRequest();
             initAPI();
+            if (window.File && window.FileReader && window.FileList && window.Blob) {
+                // Great success! All the File APIs are supported.
+                console.log('The File APIs are fully supported in this browser.');
+            } else {
+                alert('The File APIs are not fully supported in this browser.');
+            }
         }
 
 
@@ -207,6 +213,12 @@
                 update_patterns_div(patterns);
             }
         }
+        function add_pattern(value) {
+            xmlhttp.open('POST', patternsUri, false); 
+            jsonSerial = JSON.stringify(patterns); 
+            log(jsonSerial);
+            xmlhttp.send("{'pattern':"+jsonSerial+"}");
+        }
         function put_patterns(value) {
             xmlhttp.open('POST', patternsUri, false); 
             jsonSerial = JSON.stringify(patterns); 
@@ -311,7 +323,7 @@
 
         function update_instruments_div(instruments) {
             var instselector = document.getElementById('instrumentSelectors'),
-                instDiv = document.getElementById('instruments'),
+                instDiv = document.getElementById('instrumentView'),
                 i = null,
                 instSpan,
                 instView,
@@ -324,12 +336,12 @@
             for (i in instruments) {
                 if (instruments.hasOwnProperty(i)) {
                     instSpan = document.createElement('span');
-                    instSpan.innerHTML = 'instrument '+i;
+                    //instSpan.innerHTML = 'instrument '+i;
                     instLink = document.createElement('span');
                     instLink.setAttribute("class", "instSelector");
                     instText = document.createElement("span");
-                    instText.innerHTML = "instrument " + i;
-                    instText.setAttribute("onclick", "showInstrument('instrumentData_"+i+"')");
+                    instText.innerHTML = "instrument-" + i + " ";
+                    instText.setAttribute("onclick", "showInstrument('"+i+"')");
                     instLink.appendChild(instText);
 
                     instselector.appendChild(instLink);
@@ -337,11 +349,34 @@
                 }
             }
         }
+        function showInstrument(insNo) {
+            var samples = instruments[insNo].samples,
+                instSpan,
+                i;
+            instDiv = document.getElementById('instrumentView');
+            cleanElement(instDiv);
+            instSpan = document.createElement('span');
+            console.log(instruments[insNo].samples[0]);
+            for (i in samples) {
+                if (samples.hasOwnProperty(i)) {
+                    console.log(i);
+                }
+            }
+        }
 
         function update_patterns_div(patterns) {
+            var i;
+            if (modglobals == null) {
+                load();
+            }
+            for (i = 0; i < patterns.length; i += 1) {
+                renderPatternBlock(i);
+            }
+        }
+        function renderPatternBlock(i) {
             var patselector = document.getElementById('patternSelectors'),
                 pattsdiv = document.getElementById('patterns'),
-                i = null,
+               // i = null,
                 patdiv,
                 patspan,
                 chan,
@@ -353,47 +388,43 @@
                 patText,
                 patPlay;
 
-            if (modglobals == null) {
-                load();
-            }
-            for (i in patterns) {
-                if (patterns.hasOwnProperty(i)) {
-                    patspan = document.createElement('span');
-                    patspan.innerHTML = 'pattern '+i;
-                    pattab = document.createElement('table');
-                    pattab.appendChild(patspan);
-                    pattab.setAttribute("style", "display:none");
-                    pattab.setAttribute("id", "patternData_"+i);
-                    patLink = document.createElement('span');
-                    patLink.setAttribute("class", "patternSelector");
-                    patText = document.createElement("span");
-                    patText.innerHTML = "pattern " + i;
-                    patText.setAttribute("onclick", "showPattern('patternData_"+i+"')");
-                    patPlay = document.createElement("span");
-                    patPlay.innerHTML = " &gt; ";
-                    patPlay.setAttribute("onclick", "loopPattern('"+i+"')");
-                    patPlay.setAttribute("onhover", "loopPattern('"+i+"')");
-                    patLink.appendChild(patText);
-                    patLink.appendChild(patPlay);
+            patspan = document.createElement('span');
+            patspan.innerHTML = 'pattern '+i;
+            pattab = document.createElement('table');
+            pattab.appendChild(patspan);
+            pattab.setAttribute("style", "display:none");
+            pattab.setAttribute("id", "patternData_"+i);
+            patLink = document.createElement('span');
+            patLink.setAttribute("class", "patternSelector");
+            patText = document.createElement("span");
+            patText.innerHTML = "pattern " + i;
+            patText.setAttribute("onclick", "showPattern('patternData_"+i+"')");
+            patPlay = document.createElement("span");
+            patPlay.innerHTML = " &gt; ";
+            patPlay.setAttribute("onclick", "loopPattern('"+i+"')");
+            patPlay.setAttribute("onhover", "loopPattern('"+i+"')");
+            patLink.appendChild(patText);
+            patLink.appendChild(patPlay);
 
-                    //patLink.innerHTML = "pattern "+i;
-                    //patLink.setAttribute("onclick", "showPattern('patternData_"+i+"')");
+            //patLink.innerHTML = "pattern "+i;
+            //patLink.setAttribute("onclick", "showPattern('patternData_"+i+"')");
+            //console.log(i);
+            //console.log(patterns[i]);
 
-                    for (row = 0; row < patterns[i].numRows; row += 1) {
-                        tr = document.createElement('tr');
-                        for (chan = 0; chan < modglobals.numChannels; chan += 1) { 
-                            td = getRow(i, patterns[i].data, row, chan, modglobals.numChannels);
-                            td.id = "cell_"+ i + "_" + row + "_" + chan;
-                            td.onchange = noteChange;
-                            tr.appendChild(td);
-                        }
-                        pattab.appendChild(tr);
-                    }
-                    patselector.appendChild(patLink);
-                    pattsdiv.appendChild(pattab);
+            for (row = 0; row < patterns[i].numRows; row += 1) {
+                tr = document.createElement('tr');
+                for (chan = 0; chan < modglobals.numChannels; chan += 1) { 
+                    td = getRow(i, patterns[i].data, row, chan, modglobals.numChannels);
+                    td.id = "cell_"+ i + "_" + row + "_" + chan;
+                    td.onchange = noteChange;
+                    tr.appendChild(td);
                 }
+                pattab.appendChild(tr);
             }
+            patselector.appendChild(patLink);
+            pattsdiv.appendChild(pattab);
         }
+
 
         function getRow(patno, pattern, rowNum, chanNum, numChannels) {
             var chans = null,
@@ -573,6 +604,13 @@
             //xmlhttp.send(send);
             //alert("sending"+arrayStr);
         }
+
+
+        function cleanElement(node) {
+            while (node.hasChildNodes()) {
+                node.removeChild(node.lastChild);
+            }
+        }
 </script>
     <body onLoad="init();"> 
         tune: 
@@ -595,13 +633,14 @@
             <span class='but' onClick='get_sequence();'>get_sequence</span>
             <!--<span class='but' onClick='put_sequence();'>put_sequence</span>-->
             <span class='but' onClick='get_patterns();'>get_patterns</span>
+            <span class='but' onClick='add_patterns();'>add_pattern</span>
             <!--<span class='but' onClick='put_patterns();'>put_patterns</span>-->
             <span class='but' onClick='get_instruments();'>get_instruments</span>
             <span id='sequence'/>
             <div id='patternSelectors'></div>
             <div id='patterns'></div>
             <div id='instrumentSelectors'></div>
-            <div id='instruments'></div>
+            <div id='instrumentView'></div>
         </span>
 
         <h2>Doc</h2>
