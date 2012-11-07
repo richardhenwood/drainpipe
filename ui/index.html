@@ -101,9 +101,24 @@
             if (window.File && window.FileReader && window.FileList && window.Blob) {
                 // Great success! All the File APIs are supported.
                 console.log('The File APIs are fully supported in this browser.');
+                document.getElementById('files').addEventListener('change', handleFileSelect, false);
             } else {
                 alert('The File APIs are not fully supported in this browser.');
             }
+        }
+
+        function handleFileSelect(evt) {
+            var files = evt.target.files; // FileList object
+
+            // files is a FileList of File objects. List some properties.
+            var output = [];
+            for (var i = 0, f; f = files[i]; i++) {
+                output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                        f.size, ' bytes, last modified: ',
+                        f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                        '</li>');
+            }
+            document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
         }
 
 
@@ -663,6 +678,10 @@
             <tr><td>samples</td><td>X</td><td>TODO</td><td></td><td></td><td>Samples included in instruments.</td></tr>
 
         </table>
+        <input type="file" id="files" name="files[]" multiple /><output id="list"></output>
+
+<script>
+</script>
 
         <h3>END DOC</h3>
 
