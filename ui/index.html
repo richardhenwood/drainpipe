@@ -17,6 +17,7 @@
 -->
 <html>
     <meta charset="UTF-8">
+    <!--script type="text/javascript" src="https://raw.github.com/jussi-kalliokoski/pcmdata.js/master/js/pcmdata.js"/-->
     <style type="text/css">
         #patterns table {
             border: 10px;
@@ -71,9 +72,91 @@
             border: 5px;
             padding: 5px;
         }
+        #trackerUI {
+            display: none;
+        }
   </style>
 
     <script type="text/javascript">
+        //var nt = neuralyteTracker();
+        function init() {
+            console.log("loading browser");
+            //nt = NeuralyteTracker();
+
+            //browser.registerTracker(nt);
+        }
+
+        function load(evt) {
+            nt.handleFileSelect(evt);
+        }
+
+        //this.ModBrowser = (function() {
+
+        //        function init() {
+        //            console.log("Starting browser");
+        //        }
+        //        function registerTracker(tracker) {
+
+        //        }
+
+        //        return init;
+        //}());
+
+
+        var neuralyteTracker = (function() {
+                var mod = null;
+                var readURL = null;
+                var xmlhttp = new XMLHttpRequest();
+                var apiRoot = document.location.href.split("#")[0];
+
+                return {
+                    init: function() {
+                        if (window.File && window.FileReader && window.FileList && window.Blob) {
+                            // Great success! All the File APIs are supported.
+                            console.log('The File APIs are fully supported in this browser.');
+                            document.getElementById('files').addEventListener('change', handleFileSelect, false);
+                        } else {
+                            alert('The File APIs are not fully supported in this browser.');
+                        }
+                    },
+                    load: function(id) {
+                        startWorking();
+                        readURL = document.getElementById(id).value;
+                        console.log("loading: " + readURL);  
+                        apiRoot = apiRoot+"/"+encodeURIComponent(readURL)+"";
+                        xmlhttp.open('GET', apiRoot, false); 
+                        xmlhttp.send(null);
+                        if(xmlhttp.status == 200) {
+                            console.log(apiRoot);      
+                            mod = eval("("+xmlhttp.responseText+")");
+                        }
+                        else {
+                            console.log("can't load");
+                        }
+                        console.log("load complete");
+                        stopWorking();
+                    },
+                    save: function() {
+                        console.log("saving: " + storeURL);  
+                    }
+                }
+
+                function startWorking() {
+                    var image = document.createElement('img');
+                    image.src = "http://imageshack.us/scaled/landing/691/throbber.gif";
+                    document.getElementById('working').appendChild(image);
+                }
+                function stopWorking() {
+                    node = document.getElementById('working');
+                    while (node.hasChildNodes()) {
+                        node.removeChild(node.lastChild);
+                    }
+                }
+
+        }());
+        //neuralyteTracker.load("http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod");
+
+        this.NeuralyteTracker = (function() {
         var playUri;
         var restartUri;
         var stopUri;
@@ -96,6 +179,7 @@
 
         function init() {
             // init for ajax requests.
+            console.log("init tracker");
             xmlhttp = new XMLHttpRequest();
             initAPI();
             if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -626,37 +710,52 @@
                 node.removeChild(node.lastChild);
             }
         }
+        return init;
+        }());
 </script>
     <body onLoad="init();"> 
-        tune: 
-        <input id='tuneUri' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"> 
-        <span class='but' onClick='load();'>load</span> 
-        <span class='but' onClick='get_jsong();'>download as jsong</span>
-        save:
-        <input id='saveUri' type="text" size="35" value="Saving target hard coded to drainpipe.iriscouch.com."> 
-        <span class='but' onClick='save();'>save</span><br/>
-
-
-        <span id='songControls'>
-            <span class='but' onClick='play();'>play</span>
-            <span class='but' onClick='restart();'>restart</span>
-            <span class='but' onClick='stop();'>stop</span><br/><br/>
-            <!-- <span class='but' onClick='get_global_vol();'>get_global_vol</span>
-            <input id='globalVol' type="text" size="2" value="??">
-            <span class='but' onClick='global_vol_up();'>vol_up</span>
-            <span class='but' onClick='global_vol_down();'>vol_down</span> -->
-            <span class='but' onClick='get_sequence();'>get_sequence</span>
-            <!--<span class='but' onClick='put_sequence();'>put_sequence</span>-->
-            <span class='but' onClick='get_patterns();'>get_patterns</span>
-            <span class='but' onClick='add_patterns();'>add_pattern</span>
-            <!--<span class='but' onClick='put_patterns();'>put_patterns</span>-->
-            <span class='but' onClick='get_instruments();'>get_instruments</span>
-            <span id='sequence'/>
-            <div id='patternSelectors'></div>
-            <div id='patterns'></div>
-            <div id='instrumentSelectors'></div>
-            <div id='instrumentView'></div>
+        <div id='title'>NeuralyteTracker v0.0.1 <span id='working'></span></div>
+        <span id='modBrowser'>
+            load from:
+            <ul>
+                <li>url: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
+                <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a></li>
+                <li>drainpipe.iriscouch.com <span id='dbmodlist'/></li>
+            </ul>
         </span>
+        <span id='trackerUI'>
+            tune: 
+            <input id='tuneUri' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"> 
+            <span class='but' onClick='load();'>load</span> 
+            <span class='but' onClick='get_jsong();'>download as jsong</span>
+            save:
+            <input id='saveUri' type="text" size="35" value="Saving target hard coded to drainpipe.iriscouch.com."> 
+            <span class='but' onClick='save();'>save</span><br/>
+
+
+            <span id='songControls'>
+                <span class='but' onClick='play();'>play</span>
+                <span class='but' onClick='restart();'>restart</span>
+                <span class='but' onClick='stop();'>stop</span><br/><br/>
+                <!-- <span class='but' onClick='get_global_vol();'>get_global_vol</span>
+                <input id='globalVol' type="text" size="2" value="??">
+                <span class='but' onClick='global_vol_up();'>vol_up</span>
+                <span class='but' onClick='global_vol_down();'>vol_down</span> -->
+                <span class='but' onClick='get_sequence();'>get_sequence</span>
+                <!--<span class='but' onClick='put_sequence();'>put_sequence</span>-->
+                <span class='but' onClick='get_patterns();'>get_patterns</span>
+                <span class='but' onClick='add_patterns();'>add_pattern</span>
+                <!--<span class='but' onClick='put_patterns();'>put_patterns</span>-->
+                <span class='but' onClick='get_instruments();'>get_instruments</span>
+                <span id='sequence'/>
+                    <div id='patternSelectors'></div>
+                    <div id='patterns'></div>
+                    <div id='instrumentSelectors'></div>
+                    <div id='instrumentView'></div>
+                </span>
+            </span>
+        </span>
+
 
         <h2>Doc</h2>
 
