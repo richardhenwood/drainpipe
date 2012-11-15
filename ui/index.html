@@ -107,7 +107,10 @@
                 var mod = null;
                 var readURL = null;
                 var xmlhttp = new XMLHttpRequest();
+                var apiName = "";
                 var apiRoot = document.location.href.split("#")[0];
+                var writeRoot = document.location.href.split("#")[0];
+                var readRoot = document.location.href.split("#")[0];
 
                 return {
                     init: function() {
@@ -123,8 +126,9 @@
                         startWorking();
                         readURL = document.getElementById(id).value;
                         console.log("loading: " + readURL);  
-                        apiRoot = apiRoot+"/"+encodeURIComponent(readURL)+"";
-                        xmlhttp.open('GET', apiRoot, false); 
+                        apiName = encodeURIComponent(readURL);
+                        readRoot = apiRoot+"/"+apiName+"";
+                        xmlhttp.open('GET', readRoot, false); 
                         xmlhttp.send(null);
                         if(xmlhttp.status == 200) {
                             console.log(apiRoot);      
@@ -136,8 +140,14 @@
                         console.log("load complete");
                         stopWorking();
                     },
-                    save: function() {
+                    save: function(storeURL) {
+                        storeURL = apiRoot+"/" + apiName + "/save";
                         console.log("saving: " + storeURL);  
+                        xmlhttp.open('GET', storeURL, false); 
+                        xmlhttp.send(null);
+                        if(xmlhttp.status == 200)
+                            console.log(storeURL);      
+                        modglobals = eval("("+xmlhttp.responseText+")");
                     }
                 }
 
@@ -243,7 +253,7 @@
                 modglobals = eval("("+xmlhttp.responseText+")");
         }
 
-        function save() {
+        function _save() {
             xmlhttp.open('GET', saveUri, false); 
             xmlhttp.send(null);
             if(xmlhttp.status == 200)
@@ -719,9 +729,15 @@
             load from:
             <ul>
                 <li>url: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
+                <li>save url: <input id='saveURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods"/>
                 <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a></li>
                 <li>drainpipe.iriscouch.com <span id='dbmodlist'/></li>
-            </ul>
+                </ul>
+                <input id='loadURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods/"/>
+            <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a><br/>
+        </span>
+        <span>
+            <span class="save">save the mod</span>
         </span>
         <span id='trackerUI'>
             tune: 

@@ -328,6 +328,7 @@ public class TrackerResource {
     	Module module = tracker.getPlayer().getModule();
     	Gson gson = new Gson();
     	String json = gson.toJson(module);
+    	String saveLocation = null;
     	try {
     		URL url = new URL("http://drainpipe.iriscouch.com/mods");
     		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -342,15 +343,18 @@ public class TrackerResource {
     			throw new RuntimeException("Failed : HTTP error code : "
     				+ conn.getResponseCode() + conn.getResponseMessage());
     		}
-     
-    		BufferedReader br = new BufferedReader(new InputStreamReader(
-    				(conn.getInputStream())));
+    		InputStreamReader in = new InputStreamReader(conn.getInputStream());
+    		BufferedReader br = new BufferedReader(in);
      
     		String output;
     		System.out.println("Output from Server .... \n");
+    		
     		while ((output = br.readLine()) != null) {
-    			System.out.println(output);
+    			System.out.println(br.readLine());
     		}
+    		saveLocation = conn.getHeaderField("Location");
+    		//conn.getInstanceFollowRedirects();
+    		System.out.println("response:"+saveLocation);
     		
     		conn.disconnect();
     	} catch (MalformedURLException e) {
@@ -362,7 +366,7 @@ public class TrackerResource {
     		e.printStackTrace();
 
     	}
-    	return("output");
+    	return("{location: '"+saveLocation+"'}");
     }
     
     @POST @Path("{songname}/save")
