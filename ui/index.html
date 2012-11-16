@@ -154,6 +154,23 @@
                         startWorking();
                         updateUI(mod);
                         stopWorking();
+                    },
+                    updateMod: function(evt) {
+                       if (evt.keyCode == 13) {
+                           mod[evt.target.id] = document.getElementById(evt.target.id).value;
+                           putMod();
+                       }
+                    },
+                    putMod: function() {
+                        startWorking();
+                        putModURL = apiRoot+"/" + apiName + "/save";
+                        xmlhttp.open('POST', putModURL, false); 
+                        xmlhttp.send(JSON.stringify(mod));
+                        if(xmlhttp.status == 200)
+                            console.log(putModURL);      
+                        modglobals = eval("("+xmlhttp.responseText+")");
+                        console.log(modglobals);
+                        stopWorking();
                     }
                 }
 
@@ -179,7 +196,6 @@
                         }
                     }
                 }
-
         }());
         //neuralyteTracker.load("http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod");
 
@@ -753,9 +769,11 @@
                 <input id='loadURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods/"/>
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a><br/>
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a><br/>
+            <a href='#' id='putMod' type='text' class='but' onClick='neuralyteTracker.putMod("");'>putMod</a><br/>
         </span>
         <span id='modMetadata'>
-            <input id='songName' type='text' size='25'/>
+            mod name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateMod(event)"/>
+            gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
 
         </span>
 

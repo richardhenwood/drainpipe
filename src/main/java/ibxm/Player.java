@@ -164,5 +164,11 @@ public class Player {
 		if (pats.length < this.ibxm.getSeqpos())
 			this.ibxm.setSequencePos(pats.length - 1);
 		this.getModule().setSequence(pats);
+	}
+
+	public void setModule(Module mod) {
+		this.ibxm.setModule(mod, SAMPLERATE);
+		// TODO Auto-generated method stub
+		
 	}	
 }

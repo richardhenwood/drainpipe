@@ -379,6 +379,10 @@ public class TrackerResource {
     @POST @Path("{songname}/save")
     @Produces("application/json")
     public String save(@PathParam("songname") String songName, String incomingJson) {
-    	return "not suppported yet";
+    	Gson gson = new Gson();
+    	Module mod = gson.fromJson(incomingJson, Module.class);
+    	tracker.getPlayer().setModule(mod);
+    	System.out.println("new mod loaded from json");
+    	return "{save:'complete'}";
     }
 }
