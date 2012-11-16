@@ -104,7 +104,8 @@
 
 
         var neuralyteTracker = (function() {
-                var mod = null;
+                mod = null;
+                //var mod = null; //uncomment this to make it private
                 var readURL = null;
                 var xmlhttp = new XMLHttpRequest();
                 var apiName = "";
@@ -194,6 +195,10 @@
                                 node.value = mod[key];
                             }
                         }
+                    }
+                    for (var i = 0; i < mod.patterns.length; i+=1) {
+                        var pat = mod.patterns[i];
+                        console.log(pat.patNumber);
                     }
                 }
         }());
@@ -775,6 +780,9 @@
             mod name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateMod(event)"/>
             gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
 
+        </span>
+        <span id='patternView'>
+            
         </span>
 
 
