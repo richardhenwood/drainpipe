@@ -131,7 +131,6 @@
                         xmlhttp.open('GET', readRoot, false); 
                         xmlhttp.send(null);
                         if(xmlhttp.status == 200) {
-                            console.log(apiRoot);      
                             mod = eval("("+xmlhttp.responseText+")");
                         }
                         else {
@@ -141,6 +140,7 @@
                         stopWorking();
                     },
                     save: function(storeURL) {
+                        startWorking();
                         storeURL = apiRoot+"/" + apiName + "/save";
                         console.log("saving: " + storeURL);  
                         xmlhttp.open('GET', storeURL, false); 
@@ -148,6 +148,12 @@
                         if(xmlhttp.status == 200)
                             console.log(storeURL);      
                         modglobals = eval("("+xmlhttp.responseText+")");
+                        stopWorking();
+                    },
+                    updateUI: function() {
+                        startWorking();
+                        updateUI(mod);
+                        stopWorking();
                     }
                 }
 
@@ -157,9 +163,20 @@
                     document.getElementById('working').appendChild(image);
                 }
                 function stopWorking() {
-                    node = document.getElementById('working');
+                    var node = document.getElementById('working');
                     while (node.hasChildNodes()) {
                         node.removeChild(node.lastChild);
+                    }
+                }
+                function updateUI(mod) {
+                    console.log(mod);
+                    for (var key in mod) {
+                        if (mod.hasOwnProperty(key)) {
+                            node = document.getElementById(key);
+                            if (node != null) {
+                                node.value = mod[key];
+                            }
+                        }
                     }
                 }
 
@@ -735,7 +752,23 @@
                 </ul>
                 <input id='loadURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods/"/>
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a><br/>
+            <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a><br/>
         </span>
+        <span id='modMetadata'>
+            <input id='songName' type='text' size='25'/>
+
+        </span>
+
+
+
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+
         <span>
             <span class="save">save the mod</span>
         </span>
