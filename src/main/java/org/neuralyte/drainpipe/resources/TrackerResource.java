@@ -64,6 +64,7 @@ public class TrackerResource {
 	String uiFileHTML = null;
 	//private JsonConfig jsonConfig = null;
 	private static Tracker tracker = null;
+	private static String loadedModURL = null; // used to avoid unnecessary mod reloads.
 
 	   
 	public TrackerResource() {
@@ -128,10 +129,16 @@ public class TrackerResource {
     @Produces("text/plain")
     public String getSongRoot(@PathParam("songname") String songName) throws IOException {
     	System.out.println("get:");
-    	System.out.println(songName);
+    	System.out.println("'"+songName+"'");
     	
     	tracker = Tracker.getInstance();
-    	tracker.loadModule(new URL(URLDecoder.decode(songName, "ISO-8859-1")));
+    	if (loadedModURL == null || !songName.endsWith(loadedModURL)) {
+    		tracker.loadModule(new URL(URLDecoder.decode(songName, "ISO-8859-1")));
+    		loadedModURL = songName;
+    	}
+    	else {
+    		System.out.println("Tune already loaded, ignoring load request.");
+    	}
 
     	Module mod = tracker.getPlayer().getModule();
     	//JSONObject json = JSONObject.fromObject(mod, jsonConfig);
