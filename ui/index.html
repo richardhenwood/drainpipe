@@ -172,6 +172,9 @@
                         modglobals = eval("("+xmlhttp.responseText+")");
                         console.log(modglobals);
                         stopWorking();
+                    },
+                    renderPattern: function(evt, patNo) {
+                        console.log("rendering pattern: " + patNo);
                     }
                 }
 
@@ -196,9 +199,17 @@
                             }
                         }
                     }
+                    var node = document.getElementById('patternView');
                     for (var i = 0; i < mod.patterns.length; i+=1) {
                         var pat = mod.patterns[i];
-                        console.log(pat.patNumber);
+                        var patSpan = document.createElement('span');
+                        patSpan.id = "pat_"+pat.patNumber;
+                        var patA = document.createElement('a');
+                        patA.href = '#';
+                        patA.innerHTML = "pat_"+i;
+                        patA.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+i+')');
+                        patSpan.appendChild(patA);
+                        node.appendChild(patSpan);
                     }
                 }
         }());
@@ -781,9 +792,9 @@
             gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
 
         </span>
-        <span id='patternView'>
+        <div id='patternView'>
             
-        </span>
+        </div>
 
 
 
