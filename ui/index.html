@@ -104,115 +104,274 @@
 
 
         var neuralyteTracker = (function() {
-                mod = null;
-                //var mod = null; //uncomment this to make it private
-                var readURL = null;
-                var xmlhttp = new XMLHttpRequest();
-                var apiName = "";
-                var apiRoot = document.location.href.split("#")[0];
-                var writeRoot = document.location.href.split("#")[0];
-                var readRoot = document.location.href.split("#")[0];
+            mod = null;
+            //var mod = null; //uncomment this to make it private
+            var readURL = null;
+            var xmlhttp = new XMLHttpRequest();
+            var apiName = "";
+            var apiRoot = document.location.href.split("#")[0];
+            var writeRoot = document.location.href.split("#")[0];
+            var readRoot = document.location.href.split("#")[0];
+            NOTES = ["..", "C-", "C#", "D-", "D#", "E-", "F-","F#", "G-", "G#", "A-", "A#", "B-"];
 
-                return {
-                    init: function() {
-                        if (window.File && window.FileReader && window.FileList && window.Blob) {
-                            // Great success! All the File APIs are supported.
-                            console.log('The File APIs are fully supported in this browser.');
-                            document.getElementById('files').addEventListener('change', handleFileSelect, false);
-                        } else {
-                            alert('The File APIs are not fully supported in this browser.');
-                        }
-                    },
-                    load: function(id) {
-                        startWorking();
-                        readURL = document.getElementById(id).value;
-                        console.log("loading: " + readURL);  
-                        apiName = encodeURIComponent(readURL);
-                        readRoot = apiRoot+"/"+apiName+"";
-                        xmlhttp.open('GET', readRoot, false); 
-                        xmlhttp.send(null);
-                        if(xmlhttp.status == 200) {
-                            mod = eval("("+xmlhttp.responseText+")");
-                        }
-                        else {
-                            console.log("can't load");
-                        }
-                        console.log("load complete");
-                        stopWorking();
-                    },
-                    save: function(storeURL) {
-                        startWorking();
-                        storeURL = apiRoot+"/" + apiName + "/save";
-                        console.log("saving: " + storeURL);  
-                        xmlhttp.open('GET', storeURL, false); 
-                        xmlhttp.send(null);
-                        if(xmlhttp.status == 200)
-                            console.log(storeURL);      
-                        modglobals = eval("("+xmlhttp.responseText+")");
-                        stopWorking();
-                    },
-                    updateUI: function() {
-                        startWorking();
-                        updateUI(mod);
-                        stopWorking();
-                    },
-                    updateMod: function(evt) {
-                       if (evt.keyCode == 13) {
-                           mod[evt.target.id] = document.getElementById(evt.target.id).value;
-                           putMod();
-                       }
-                    },
-                    putMod: function() {
-                        startWorking();
-                        putModURL = apiRoot+"/" + apiName + "/save";
-                        xmlhttp.open('POST', putModURL, false); 
-                        xmlhttp.send(JSON.stringify(mod));
-                        if(xmlhttp.status == 200)
-                            console.log(putModURL);      
-                        modglobals = eval("("+xmlhttp.responseText+")");
-                        console.log(modglobals);
-                        stopWorking();
-                    },
-                    renderPattern: function(evt, patNo) {
-                        console.log("rendering pattern: " + patNo);
+            return {
+                init: function() {
+                    if (window.File && window.FileReader && window.FileList && window.Blob) {
+                        // Great success! All the File APIs are supported.
+                        console.log('The File APIs are fully supported in this browser.');
+                        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+                    } else {
+                        alert('The File APIs are not fully supported in this browser.');
                     }
+                },
+                load: function(id) {
+                    startWorking();
+                    readURL = document.getElementById(id).value;
+                    console.log("loading: " + readURL);  
+                    apiName = encodeURIComponent(readURL);
+                    readRoot = apiRoot+"/"+apiName+"";
+                    xmlhttp.open('GET', readRoot, false); 
+                    xmlhttp.send(null);
+                    if(xmlhttp.status == 200) {
+                        mod = eval("("+xmlhttp.responseText+")");
+                    }
+                    else {
+                        console.log("can't load");
+                    }
+                    console.log("load complete");
+                    stopWorking();
+                },
+                save: function(storeURL) {
+                    startWorking();
+                    storeURL = apiRoot+"/" + apiName + "/save";
+                    console.log("saving: " + storeURL);  
+                    xmlhttp.open('GET', storeURL, false); 
+                    xmlhttp.send(null);
+                    if(xmlhttp.status == 200)
+                        console.log(storeURL);      
+                    modglobals = eval("("+xmlhttp.responseText+")");
+                    stopWorking();
+                },
+                updateUI: function() {
+                    startWorking();
+                    updateUI(mod);
+                    stopWorking();
+                },
+                updateMod: function(evt) {
+                   if (evt.keyCode == 13) {
+                       mod[evt.target.id] = document.getElementById(evt.target.id).value;
+                       putMod();
+                   }
+                },
+                putMod: function() {
+                    startWorking();
+                    putModURL = apiRoot+"/" + apiName + "/save";
+                    xmlhttp.open('POST', putModURL, false); 
+                    xmlhttp.send(JSON.stringify(mod));
+                    if(xmlhttp.status == 200)
+                        console.log(putModURL);      
+                    modglobals = eval("("+xmlhttp.responseText+")");
+                    console.log(modglobals);
+                    stopWorking();
+                },
+                renderPattern: function(evt, patNo) {
+                    pat = mod.patterns[patNo];
+                    // there is a span already in the pattern
+                    // dom object because one is created 
+                    // in the 'private' method 'updateUI'.
+                    // This design is terriable and should be
+                    // fixed.
+                    patSpan = document.getElementById('pat_' + patNo);
+                    console.log("rendering pattern: " + patNo);
+                    console.log(pat);
+                    for (row = 0; row < pat.numRows; row += 1) {
+                        tr = document.createElement('tr');
+                        for (chan = 0; chan < mod.numChannels; chan += 1) { 
+                            td = getRow(patNo, pat, row, chan, mod.numChannels);
+                            td.id = "cell_"+ patNo+ "_" + row + "_" + chan;
+                            td.onchange = this.noteChange;
+                            tr.appendChild(td);
+                        }
+                        patSpan.appendChild(tr);
+                    }
+                },
+                noteChange: function (evt) {
+                    var bits, pat, row, chan, dataidx, celldiv;
+
+                    evt = evt || window.event;
+                    log(evt);
+                    bits = evt.currentTarget.id.split('_');
+                    pat = bits[1];
+                    row = bits[2];
+                    chan = bits[3];
+                    //celldiv = document.getElementById(evt.currentTarget.id),
+                    dataidx = parseInt((row * patterns[pat].numRows) + chan);
+
+                    if (evt.target.className == "note") {
+                        patterns[pat].data[dataidx][0] = evt.target.value.replace(".","");
+                    }
+                    if (evt.target.className == "inst") {
+                        patterns[pat].data[dataidx][1] = parseInt(evt.target.value.replace(".",""));
+                    }
+                    if (evt.target.className == "vol") {
+                        patterns[pat].data[dataidx][2] = parseInt(evt.target.value.replace(".",""));
+                    }
+                    if (evt.target.className == "type") {
+                        patterns[pat].data[dataidx][3] = parseInt(evt.target.value.replace(".",""));
+                    }
+                    if (evt.target.className == "effval") {
+                        patterns[pat].data[dataidx][4] = parseInt(evt.target.value.replace(".",""));
+                    }
+                    put_pattern(pat, patterns[pat]);
+                    
+                    //log(pat + " " + row + " " + chan);
+                    //log(window.event);
+                    //log(val);
                 }
 
-                function startWorking() {
-                    var image = document.createElement('img');
-                    image.src = "http://imageshack.us/scaled/landing/691/throbber.gif";
-                    document.getElementById('working').appendChild(image);
+            }
+
+            function startWorking() {
+                var image = document.createElement('img');
+                image.src = "http://imageshack.us/scaled/landing/691/throbber.gif";
+                document.getElementById('working').appendChild(image);
+            }
+            function stopWorking() {
+                var node = document.getElementById('working');
+                while (node.hasChildNodes()) {
+                    node.removeChild(node.lastChild);
                 }
-                function stopWorking() {
-                    var node = document.getElementById('working');
-                    while (node.hasChildNodes()) {
-                        node.removeChild(node.lastChild);
-                    }
-                }
-                function updateUI(mod) {
-                    console.log(mod);
-                    for (var key in mod) {
-                        if (mod.hasOwnProperty(key)) {
-                            node = document.getElementById(key);
-                            if (node != null) {
-                                node.value = mod[key];
-                            }
+            }
+            function updateUI(mod) {
+                console.log(mod);
+                for (var key in mod) {
+                    if (mod.hasOwnProperty(key)) {
+                        node = document.getElementById(key);
+                        if (node != null) {
+                            node.value = mod[key];
                         }
                     }
-                    var node = document.getElementById('patternView');
-                    for (var i = 0; i < mod.patterns.length; i+=1) {
-                        var pat = mod.patterns[i];
-                        var patSpan = document.createElement('span');
-                        patSpan.id = "pat_"+pat.patNumber;
-                        var patA = document.createElement('a');
-                        patA.href = '#';
-                        patA.innerHTML = "pat_"+i;
-                        patA.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+i+')');
-                        patSpan.appendChild(patA);
-                        node.appendChild(patSpan);
-                    }
                 }
+                var node = document.getElementById('patternView');
+                for (var i = 0; i < mod.patterns.length; i+=1) {
+                    var pat = mod.patterns[i];
+                    var patSpan = document.createElement('span');
+                    patSpan.id = "pat_"+pat.patNumber;
+                    var patA = document.createElement('a');
+                    patA.href = '#';
+                    patA.innerHTML = "pat_"+i;
+                    patA.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+i+')');
+                    patSpan.appendChild(patA);
+                    node.appendChild(patSpan);
+                }
+            }
+            function getRow(patno, pattern, rowNum, chanNum, numChannels) {
+                var chans = null,
+                res = "",
+                count = 0,
+                i = 0,
+                row = null,
+                td = document.createElement('td'),
+                note = document.createElement('input'),
+                inst = document.createElement('input'),
+                vol = document.createElement('input'),
+                eff = document.createElement('input'),
+                effval = document.createElement('input');
+
+                rowidx = (rowNum * numChannels) + chanNum;
+                row = pattern.data[rowidx];
+
+                note.type = 'type';
+                note.size = 3;
+                note.value = getNote(row);
+                note.className = 'note';
+
+                inst.type = 'type';
+                inst.size = 2;
+                inst.value = getInst(row);
+                inst.className = 'inst';
+
+                vol.type = 'type';
+                vol.size = 3;
+                vol.value = getVol(row);
+                vol.className = 'vol';
+
+                eff.type = 'type';
+                eff.size = 1;
+                eff.value = getEff(row);
+                eff.className = 'eff';
+
+                effval.type = 'type';
+                effval.size = 2;
+                effval.value = getEffVal(row);
+                effval.className = 'effval';
+
+                td.appendChild(note);
+                td.appendChild(inst);
+                td.appendChild(vol);
+                td.appendChild(eff);
+                td.appendChild(effval);
+                return td;
+            }
+            function getNote(row) {
+                var int = row[0],
+                    ret = "";
+                if (int == 97) {
+                    return "---";
+                }
+                ret += NOTES[int % 12];
+                ret += Math.floor(int / 12);
+                return ret;
+            }
+            function getInst(row) {
+                return rightjustify(row[1].toString(16), 2);
+            }
+            function getVol(row) {
+                return rightjustify(row[2], 3);
+            }
+            function rightjustify(value, places) {
+                var ret = "";
+                ret = value + "";
+                if (ret.length < 2) {
+                    ret = "." + ret;
+                }
+                if (ret.length < 3) {
+                    ret = "." + ret;
+                }
+                return ret.substring(3 - places);
+            }
+            function getEff(row) {
+                return row[3];
+            }
+            function getEffVal(row) {
+                var int = row[4],
+                    ret = "";
+                ret = int + "";
+                if (ret.length < 2) {
+                    ret = "0" + ret;
+                }
+                return ret;
+            }
         }());
+
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
+//////////////////////////////////old code below///////////////////////////////////////
         //neuralyteTracker.load("http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod");
 
         this.NeuralyteTracker = (function() {
