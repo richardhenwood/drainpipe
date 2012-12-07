@@ -195,9 +195,7 @@ public class Tracker implements Runnable {
                         vector.add( String.format( "%03d: %s", idx, name ) );
         }
         instrumentList.setListData( vector );
-*/
-		
-		
+*/	
 //		player.setModule( ibxm.Player.loadModule( urlfs ) );
 		//urlfs.close();
         
@@ -205,6 +203,14 @@ public class Tracker implements Runnable {
 			System.out.println("can't start player.");
 			e.printStackTrace();
 		}*/
+	}
+	
+	public void newModule() {
+		Module module = new Module();
+		player = new Player(SAMPLE_RATE);
+		player.loadModule(module);
+		duration = player.calculateSongDuration();
+		samplePos = 0;
 	}
 	
 	public Player getPlayer() {

@@ -32,6 +32,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Arrays;
@@ -44,6 +46,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 //import net.sf.json.JSON;
 //import net.sf.json.JSONArray;
@@ -123,6 +127,28 @@ public class TrackerResource {
     	return uiFileHTML;
 
     	//return "poor mans static";
+    }
+    
+    @GET @Path("{songname}/new")
+    @Produces("text/plain")
+    public String newSong(@PathParam("songname") String songName) throws URISyntaxException {
+    	tracker = Tracker.getInstance();
+    	tracker.newModule();
+    	/*try {
+    		// TODO: a new modules really should be availabe as a constructor.
+			//tracker.loadModule(new URL("http://neuralyte.org/~ig0r/new.xm"));
+    		
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+    	
+    	return this.save(songName);
+    	//return("{location: '"+songName+"'}");
+		//return Response.created(new URI(songName));
     }
     
     @GET @Path("{songname}")
@@ -374,6 +400,8 @@ public class TrackerResource {
 
     	}
     	return("{location: '"+saveLocation+"'}");
+    	
+    	//return Response.seeOther(new URI(saveLocation)).build();
     }
     
     @POST @Path("{songname}/save")

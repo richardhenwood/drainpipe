@@ -124,6 +124,19 @@
                         alert('The File APIs are not fully supported in this browser.');
                     }
                 },
+                new: function() {
+                    newRoot = apiRoot+"/new/new";
+                    xmlhttp.open('GET', newRoot, false); 
+                    xmlhttp.send(null);
+                    if(xmlhttp.status == 200) {
+                        console.log("new jsong created");
+                        console.log(xmlhttp.responseText);
+                    }
+                    else {
+                        console.log("can not create new jsong");
+                    }
+                    console.log("load complete");
+                },
                 load: function(id) {
                     startWorking();
                     readURL = document.getElementById(id).value;
@@ -940,6 +953,7 @@
                 <li>save url: <input id='saveURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods"/>
                 <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a></li>
                 <li>drainpipe.iriscouch.com <span id='dbmodlist'/></li>
+                    <li><a href='#' class='but' onClick='neuralyteTracker.new();'>new</a></li>
                 </ul>
                 <input id='loadURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods/"/>
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a><br/>
