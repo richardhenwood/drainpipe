@@ -125,6 +125,7 @@
                     }
                 },
                 new: function() {
+                    startWorking();
                     newRoot = apiRoot+"/new/new";
                     xmlhttp.open('GET', newRoot, false); 
                     xmlhttp.send(null);
@@ -136,6 +137,7 @@
                         console.log("can not create new jsong");
                     }
                     console.log("load complete");
+                    stopWorking();
                 },
                 load: function(id) {
                     startWorking();
