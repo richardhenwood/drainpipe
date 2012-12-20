@@ -189,6 +189,9 @@
                     console.log(modglobals);
                     stopWorking();
                 },
+                renderInstrument: function(evt, instNo) {
+                    console.log(instNo);
+                },
                 renderPattern: function(evt, patNo) {
                     pat = mod.patterns[patNo];
                     // there is a span already in the pattern
@@ -258,7 +261,6 @@
                 }
             }
             function updateUI(mod) {
-                console.log(mod);
                 for (var key in mod) {
                     if (mod.hasOwnProperty(key)) {
                         node = document.getElementById(key);
@@ -267,7 +269,7 @@
                         }
                     }
                 }
-                var node = document.getElementById('patternView');
+                var patternView = document.getElementById('patternView');
                 for (var i = 0; i < mod.patterns.length; i+=1) {
                     var pat = mod.patterns[i];
                     var patSpan = document.createElement('span');
@@ -277,7 +279,19 @@
                     patA.innerHTML = "pat_"+i;
                     patA.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+i+')');
                     patSpan.appendChild(patA);
-                    node.appendChild(patSpan);
+                    patternView.appendChild(patSpan);
+                }
+                var instrumentView = document.getElementById('instrumentView');
+                for (var i = 0; i < mod.instruments.length; i += 1) {
+                    var inst = mod.instruments[i];
+                    var instSpan = document.createElement('span');
+                    instSpan.id = "inst_"+i;
+                    var instA = document.createElement('a');
+                    instA.href = "#";
+                    instA.innerHTML = "'"+inst.name+"'";
+                    instA.setAttribute('onclick', 'neuralyteTracker.renderInstrument(event,'+i+')');
+                    instSpan.appendChild(instA);
+                    instrumentView.appendChild(instSpan);
                 }
             }
             function getRow(patno, pattern, rowNum, chanNum, numChannels) {
@@ -967,9 +981,8 @@
             gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
 
         </span>
-        <div id='patternView'>
-            
-        </div>
+        <div id='patternView'></div>
+        <div id='instrumentView'></div>
 
 
 
@@ -1012,7 +1025,7 @@
                     <div id='patternSelectors'></div>
                     <div id='patterns'></div>
                     <div id='instrumentSelectors'></div>
-                    <div id='instrumentView'></div>
+                    <!--div id='instrumentView'></div-->
                 </span>
             </span>
         </span>
