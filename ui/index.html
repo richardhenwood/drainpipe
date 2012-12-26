@@ -190,7 +190,40 @@
                     stopWorking();
                 },
                 renderInstrument: function(evt, instNo) {
-                    console.log(instNo);
+                    inst = mod.instruments[instNo];
+                    console.log(inst);
+                    instSpan = document.getElementById('inst_'+instNo);
+                    name = document.createElement('input');
+                    console.log(inst.name);
+                    name.value = inst.name;
+                    name.onchange = function() {inst.name = name.value;};
+                    text = document.createTextNode("name:");
+                    name = document.createElement('href');
+
+                    instSpan.appendChild(text);
+                    instSpan.appendChild(name);
+                    for (i = 0; i < inst.numSamples; i += 1) {
+                        sampleA = document.createElement('a');
+                        sampleA.href = '#';
+                        sampleA.innerHTML = "samp_"+i;
+                        sampleA.setAttribute('onclick', 'neuralyteTracker.renderSample(event,'+instNo+','+i+')');
+                        sampSpan = document.createElement('span');
+                        sampSpan.id = 'samp_'+instNo+'_'+i;
+                        instSpan.appendChild(sampSpan);
+                        instSpan.appendChild(sampleA);
+                    }
+                },
+                renderSample: function(evt, instNo, sampNo) {
+                    samp = mod.instruments[instNo].samples[sampNo];
+                    patSpan = document.getElementById('samp_' + instNo + '_'+sampNo);
+
+                    if ('sampleData' in samp) { }
+                    else {
+                        samp.sampleData = Array();
+                        samp.sampleData.length = 1000; 
+                    }
+                    
+                    console.log(samp.sampleData);
                 },
                 renderPattern: function(evt, patNo) {
                     pat = mod.patterns[patNo];
@@ -283,16 +316,19 @@
                 }
                 var instrumentView = document.getElementById('instrumentView');
                 for (var i = 0; i < mod.instruments.length; i += 1) {
-                    var inst = mod.instruments[i];
-                    var instSpan = document.createElement('span');
-                    instSpan.id = "inst_"+i;
-                    var instA = document.createElement('a');
-                    instA.href = "#";
-                    instA.innerHTML = "'"+inst.name+"'";
-                    instA.setAttribute('onclick', 'neuralyteTracker.renderInstrument(event,'+i+')');
-                    instSpan.appendChild(instA);
-                    instrumentView.appendChild(instSpan);
+                    instrumentView.appendChild(getInstSpan(i));
                 }
+            }
+            function getInstSpan(i) {
+                var inst = mod.instruments[i];
+                var instSpan = document.createElement('span');
+                instSpan.id = "inst_"+i;
+                var instA = document.createElement('a');
+                instA.href = "#";
+                instA.innerHTML = "'inst_"+i+"'";
+                instA.setAttribute('onclick', 'neuralyteTracker.renderInstrument(event,'+i+')');
+                instSpan.appendChild(instA);
+                return instSpan;
             }
             function getRow(patno, pattern, rowNum, chanNum, numChannels) {
                 var chans = null,
@@ -966,8 +1002,8 @@
             load from:
             <ul>
                 <li>url: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
-                <li>save url: <input id='saveURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods"/>
                 <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a></li>
+                <li>save url: <input id='saveURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods"/>
                 <li>drainpipe.iriscouch.com <span id='dbmodlist'/></li>
                     <li><a href='#' class='but' onClick='neuralyteTracker.new();'>new</a></li>
                 </ul>
