@@ -167,6 +167,27 @@
                     modglobals = eval("("+xmlhttp.responseText+")");
                     stopWorking();
                 },
+                play: function() {
+                    playURL = apiRoot+"/" + apiName + "/play";
+                    xmlhttp.open('GET', playURL, false); 
+                    xmlhttp.send(null);
+                    if(xmlhttp.status == 200)
+                        console.log("playing: " + playURL);  
+                },
+                pause: function() {
+                    playURL = apiRoot+"/" + apiName + "/stop";
+                    xmlhttp.open('GET', playURL, false); 
+                    xmlhttp.send(null);
+                    if(xmlhttp.status == 200)
+                        console.log("stopped: " + playURL);  
+                },
+                restart: function() {
+                    playURL = apiRoot+"/" + apiName + "/restart";
+                    xmlhttp.open('GET', playURL, false); 
+                    xmlhttp.send(null);
+                    if(xmlhttp.status == 200)
+                        console.log("stopped: " + playURL);  
+                },
                 updateUI: function() {
                     startWorking();
                     updateUI(mod);
@@ -215,15 +236,26 @@
                 },
                 renderSample: function(evt, instNo, sampNo) {
                     samp = mod.instruments[instNo].samples[sampNo];
-                    patSpan = document.getElementById('samp_' + instNo + '_'+sampNo);
+                    sampSpan = document.getElementById('samp_' + instNo + '_'+sampNo);
 
-                    if ('sampleData' in samp) { }
-                    else {
-                        samp.sampleData = Array();
-                        samp.sampleData.length = 1000; 
+                    if (!('sampleData' in samp)) {
+                        console.log('no sample data, initializing.');
+                        initSize = 1000;
+                        samp.sampleData = new Array(initSize);
+                        while (--initSize >= 0) {
+                            samp.sampleData[initSize] = 0;
+                        }
+
                     }
+                    sampCanvas = document.createElement('canvas');
+                    sampCanvas.setAttribute('height', 100);
+                    sampCanvas.setAttribute('width', 300);
+                    sampSpan.appendChild(sampCanvas);
+                    drawSample(sampCanvas.getContext('2d'), samp.sampleData);
+
+                    console.log('sample data is ready for drawing.');
                     
-                    console.log(samp.sampleData);
+                    //console.log(samp.sampleData);
                 },
                 renderPattern: function(evt, patNo) {
                     pat = mod.patterns[patNo];
@@ -280,6 +312,26 @@
                     //log(val);
                 }
 
+            }
+
+            function drawSample(ctx, sampData) {
+                var i = 0,
+                    width = ctx.canvas.width,
+                    height = ctx.canvas.height,
+                    points = sampData.length,
+                    pointspx = width/points;
+
+                ctx.beginPath();
+                ctx.strokeStyle = '"rgb(255,165,0)";';
+                ctx.moveTo(0,0);
+                ctx.moveTo(0,height/2+((height*sampData[0])/65534.0));
+                for (pt = 1; pt < points; pt += 1) {
+                    ctx.lineTo(pt*(width/points), height/2+((height*sampData[pt])/65534.0));
+                }
+                ctx.stroke();
+                ctx.closePath();
+
+                console.log('drawn.');
             }
 
             function startWorking() {
@@ -1012,8 +1064,12 @@
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a><br/>
             <a href='#' id='putMod' type='text' class='but' onClick='neuralyteTracker.putMod("");'>putMod</a><br/>
         </span>
-        <span id='modMetadata'>
-            mod name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateMod(event)"/>
+        <span id='rendercontrols'>
+            <a href='#' class='but' id='playbutton' onClick='neuralyteTracker.play();'>play</a><br/>
+            <a href='#' class='but' id='stopbutton' onClick='neuralyteTracker.pause();'>pause</a><br/>
+            <a href='#' class='but' id='stopbutton' onClick='neuralyteTracker.restart();'>restart</a><br/>
+            </span>
+        <span id='modMetadata'> mod name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateMod(event)"/>
             gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
 
         </span>
@@ -1030,9 +1086,6 @@
         <br/>
         <br/>
 
-        <span>
-            <span class="save">save the mod</span>
-        </span>
         <span id='trackerUI'>
             tune: 
             <input id='tuneUri' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"> 
