@@ -355,4 +355,11 @@ public class IBXM {
 	public int getSeqpos() {
 		return seqPos;
 	}
+
+	public int getSpeed() {
+		return this.speed;
+	}
+	public int getTickLen() {
+		return this.tickLen;
+	}
 }

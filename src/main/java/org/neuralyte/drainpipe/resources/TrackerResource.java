@@ -146,9 +146,9 @@ public class TrackerResource {
 			e.printStackTrace();
 		}*/
     	
+    	//return Response.created(new URI(songName));
     	return this.save(songName);
     	//return("{location: '"+songName+"'}");
-		//return Response.created(new URI(songName));
     }
     
     @GET @Path("{songname}")
@@ -183,6 +183,7 @@ public class TrackerResource {
     		this.getSongRoot(songName);
     	}
     	tracker.play();
+    	tracker.getPlayer().getSpeed();
     	return "playing.";
     }
     
@@ -283,8 +284,12 @@ public class TrackerResource {
     	if (tracker == null) {
     		this.getSongRoot(songName);
     	}
+    	if (!tracker.isPlaying()) {
+    		tracker.play();
+    	}
     	tracker.playPattern(patNo);
-    	return "playing.";
+    	tracker.getPlayer().getSpeed();
+    	return "playing pattern: " + patNo;
     	
     	/*
     	    	

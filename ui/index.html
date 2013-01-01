@@ -1,6 +1,6 @@
 <!-- 
     Project Drainpipe: A RESTful sound tracker
-    Copyright (C) 2012  Richard Henwood rjhenwod@yahoo.co.uk
+    Copyright (C) 2012,2013  Richard Henwood rjhenwod@yahoo.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -17,10 +17,33 @@
 -->
 <html>
     <meta charset="UTF-8">
-    <!--script type="text/javascript" src="https://raw.github.com/jussi-kalliokoski/pcmdata.js/master/js/pcmdata.js"/-->
+    <!--script type="text/javascript" src="https://raw.github.com/jussi-kalliokoski/pcmdata.js/master/js/pcmdata.js"></script-->
+    <!--script type='text/javascript' src='https://raw.github.com/oampo/audiofile.js/master/audiofile.js'></script-->
+    <script language='javascript' type='text/javascript' src="https://raw.github.com/oampo/audiofile.js/master/audiofile.js"></script>
+
     <style type="text/css">
         #patterns table {
             border: 10px;
+        }
+        #rendercontrols {
+            background-color: #88ff00;
+            float: left;
+            width: 100px;
+            padding: 10px;
+        }
+        #modbrowser {
+            width: 200px;
+            float: left;
+            background-color: green;
+            padding: 10px;
+        }
+        #instrumentView {
+            width: 600px;
+            float: left;
+        }
+        #modMetadata {
+            width: 250px;
+            float: left;
         }
         .note {
             color: purple;
@@ -64,8 +87,8 @@
         }
         .but {
             background-color: #ffddff;
-            border: 5px;
-            padding: 5px;
+            border: 0px;
+            padding: 0px;
         }
         .patternSelector {
             background-color: #ddffdd;
@@ -188,6 +211,19 @@
                     if(xmlhttp.status == 200)
                         console.log("stopped: " + playURL);  
                 },
+                loopPattern: function(evt, patNo) {
+                    loopUri = apiRoot+'/' + apiName + "/pattern/" + patNo + "/play";
+                    xmlhttp.open('GET', loopUri, false); 
+                    xmlhttp.send(null);
+                    if(xmlhttp.status == 200)
+                        console.log(loopUri);      
+                },
+                loadWavFile: function (evt) {
+                    if (document.getElementById("uploadWav").files.length === 0) { return; }
+                    oFile = document.getElementById("uploadWav").files[0];
+                    console.log(this);
+
+                },
                 updateUI: function() {
                     startWorking();
                     updateUI(mod);
@@ -267,6 +303,8 @@
                     patSpan = document.getElementById('pat_' + patNo);
                     console.log("rendering pattern: " + patNo);
                     console.log(pat);
+                    var patTable = document.createElement('table');
+                    patTable.id = "pat_"+patNo+"_table";
                     for (row = 0; row < pat.numRows; row += 1) {
                         tr = document.createElement('tr');
                         for (chan = 0; chan < mod.numChannels; chan += 1) { 
@@ -275,8 +313,20 @@
                             td.onchange = this.noteChange;
                             tr.appendChild(td);
                         }
-                        patSpan.appendChild(tr);
+                        patTable.appendChild(tr);
                     }
+                    patSpan.appendChild(patTable);
+                    patExpander = document.getElementById('pat_' + patNo+'_expander');
+                    patExpander.innerHTML = '-';
+                    patExpander.setAttribute('onclick', 'neuralyteTracker.removePattern(event,'+patNo+')');
+                    console.log(patExpander);
+                },
+                removePattern: function (evt, patNo) {
+                    patTable = document.getElementById('pat_' + patNo +'_table');
+                    patTable.parentNode.removeChild(patTable);
+                    patExpander = document.getElementById('pat_' + patNo+'_expander');
+                    patExpander.innerHTML = '+';
+                    patExpander.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+patNo+')');
                 },
                 noteChange: function (evt) {
                     var bits, pat, row, chan, dataidx, celldiv;
@@ -358,12 +408,21 @@
                 for (var i = 0; i < mod.patterns.length; i+=1) {
                     var pat = mod.patterns[i];
                     var patSpan = document.createElement('span');
-                    patSpan.id = "pat_"+pat.patNumber;
+                    patSpan.id = 'pat_'+pat.patNumber;
+                    var patText = document.createTextNode('pat ' + i);
                     var patA = document.createElement('a');
                     patA.href = '#';
-                    patA.innerHTML = "pat_"+i;
+                    patA.innerHTML = '+';
+                    patA.id = 'pat_'+pat.patNumber+'_expander';
                     patA.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+i+')');
+                    var patB = document.createElement('a');
+                    patB.href = '#';
+                    patB.innerHTML = '>';
+                    patB.setAttribute('onclick', 'neuralyteTracker.loopPattern(event,'+i+')');
+                    patSpan.appendChild(patText);
                     patSpan.appendChild(patA);
+                    patSpan.appendChild(patB);
+                    patSpan.appendChild(document.createTextNode('  '));
                     patternView.appendChild(patSpan);
                 }
                 var instrumentView = document.getElementById('instrumentView');
@@ -1050,31 +1109,27 @@
 </script>
     <body onLoad="init();"> 
         <div id='title'>NeuralyteTracker v0.0.1 <span id='working'></span></div>
-        <span id='modBrowser'>
-            load from:
-            <ul>
-                <li>url: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
-                <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a></li>
-                <li>save url: <input id='saveURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods"/>
-                <li>drainpipe.iriscouch.com <span id='dbmodlist'/></li>
-                    <li><a href='#' class='but' onClick='neuralyteTracker.new();'>new</a></li>
-                </ul>
-                <input id='loadURL' type="text" size="25" value="http://drainpipe.iriscouch.com/mods/"/>
-            <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a><br/>
-            <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a><br/>
-            <a href='#' id='putMod' type='text' class='but' onClick='neuralyteTracker.putMod("");'>putMod</a><br/>
-        </span>
+        <div id='modBrowser'>
+            load from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
+                <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a> or 
+                    <a href='#' class='but' onClick='neuralyteTracker.new();'>new</a> <br/>
+            <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a>
+            <a href='#' id='putMod' type='text' class='but' onClick='neuralyteTracker.putMod("");'>pushJsong</a>
+            <a href='#' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a>
+        </div>
         <span id='rendercontrols'>
             <a href='#' class='but' id='playbutton' onClick='neuralyteTracker.play();'>play</a><br/>
             <a href='#' class='but' id='stopbutton' onClick='neuralyteTracker.pause();'>pause</a><br/>
             <a href='#' class='but' id='stopbutton' onClick='neuralyteTracker.restart();'>restart</a><br/>
             </span>
-        <span id='modMetadata'> mod name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateMod(event)"/>
-            gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
+            <div id='modMetadata'> mod name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateMod(event)"/></br>
+            gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/></br>
+            defaultSpeed: <input id='defaultSpeed' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/></br>
+            defaultTempo: <input id='defaultTempo' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
 
-        </span>
-        <div id='patternView'></div>
+        </div>
         <div id='instrumentView'></div>
+        <div id='patternView'></div>
 
 
 
@@ -1084,6 +1139,7 @@
         <br/>
         <br/>
         <br/>
+        <input id="uploadWav" type="file" name="wav Load" onchange="neuralyteTracker.loadWavFile();" />
         <br/>
 
         <span id='trackerUI'>

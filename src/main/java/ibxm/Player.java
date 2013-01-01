@@ -170,5 +170,11 @@ public class Player {
 		this.ibxm.setModule(mod, SAMPLERATE);
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void getSpeed() {
+		System.out.println("speed: " + ibxm.getSpeed() + " ticklen: " + ibxm.getTickLen());
+		// TODO Auto-generated method stub
+		
 	}	
 }

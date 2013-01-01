@@ -61,6 +61,7 @@ public class Tracker implements Runnable {
 	private int interpolation, duration, samplePos;
     //private IBXM ibxm;
 	private Player player;
+	private boolean isPlaying = false;
 	
    // private JList instrumentList;
 
@@ -91,6 +92,9 @@ public class Tracker implements Runnable {
 
 	public void play () {
 		player.play();
+	}
+	public boolean isPlaying () {
+		return this.isPlaying;
 	}
 
 	public void playPattern (int patNo) {
