@@ -51,8 +51,15 @@
             height: 200px;
         }
         #documentation {
-            width: 800px;
+            width: 100%;
             display: block;
+            float: left;
+        }       
+        #trackerUI {
+            width: 100%;
+            height: 500px;
+            display: block;
+            float: left;
         }       
 
         #instrumentView {
@@ -559,6 +566,7 @@
 </script>
     <body onLoad="init();"> 
         <div id='title'>NeuralyteTracker v0.1.0 <span id='working'></span></div>
+        <span id='trackerUI'>
         <div id='modBrowser'>
             load from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
                 <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a> or 
@@ -593,8 +601,9 @@
         <br/>
         <!--input id="uploadWav" type="file" name="wav Load" onchange="neuralyteTracker.loadWavFile();" /-->
         <br/>
+        <span>
 
-        <div id='documentation'>
+        <span id='documentation'>
         <h2>Doc</h2>
 
         The source is the documentation. 
@@ -628,6 +637,6 @@
 
 		...
 
-    </div>
+    </span>
     </body>
 </html>
