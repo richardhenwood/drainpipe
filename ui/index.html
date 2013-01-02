@@ -19,11 +19,12 @@
     <meta charset="UTF-8">
     <!--script type="text/javascript" src="https://raw.github.com/jussi-kalliokoski/pcmdata.js/master/js/pcmdata.js"></script-->
     <!--script type='text/javascript' src='https://raw.github.com/oampo/audiofile.js/master/audiofile.js'></script-->
-    <script language='javascript' type='text/javascript' src="https://raw.github.com/oampo/audiofile.js/master/audiofile.js"></script>
+    <script language='javascript' src="https://raw.github.com/oampo/audiofile.js/master/audiofile.js"></script>
 
     <style type="text/css">
         #patterns table {
             border: 10px;
+            width: 100%;
         }
         #rendercontrols {
             background-color: #88ff00;
@@ -37,9 +38,35 @@
             background-color: green;
             padding: 10px;
         }
-        #instrumentView {
+        #patternView {
+            width: 100%;
+            float: left;
+            background-color: #ddddff;
+            display: block;
+        }
+        #instruments {
             width: 600px;
             float: left;
+            background-color: #ffdddd;
+            height: 200px;
+        }
+        #documentation {
+            width: 800px;
+            display: block;
+        }       
+
+        #instrumentView {
+            width: 200px;
+            float: left;
+            overflow: auto;
+            height: 200px;
+        }
+        #sampleView {
+            width: 400px;
+            float: left;
+            overflow: auto;
+            height: 200px;
+            background-color: #ffcccc;
         }
         #modMetadata {
             width: 250px;
@@ -135,7 +162,7 @@
             var apiRoot = document.location.href.split("#")[0];
             var writeRoot = document.location.href.split("#")[0];
             var readRoot = document.location.href.split("#")[0];
-            NOTES = ["..", "C-", "C#", "D-", "D#", "E-", "F-","F#", "G-", "G#", "A-", "A#", "B-"];
+            var NOTES = ["..", "C-", "C#", "D-", "D#", "E-", "F-","F#", "G-", "G#", "A-", "A#", "B-"];
 
             return {
                 init: function() {
@@ -218,12 +245,6 @@
                     if(xmlhttp.status == 200)
                         console.log(loopUri);      
                 },
-                loadWavFile: function (evt) {
-                    if (document.getElementById("uploadWav").files.length === 0) { return; }
-                    oFile = document.getElementById("uploadWav").files[0];
-                    console.log(this);
-
-                },
                 updateUI: function() {
                     startWorking();
                     updateUI(mod);
@@ -246,37 +267,43 @@
                     console.log(modglobals);
                     stopWorking();
                 },
-                renderInstrument: function(evt, instNo) {
-                    inst = mod.instruments[instNo];
+                renderInstrument: function(instNo) {
+                    var inst = mod.instruments[instNo];
                     console.log(inst);
-                    instSpan = document.getElementById('inst_'+instNo);
-                    name = document.createElement('input');
-                    console.log(inst.name);
-                    name.value = inst.name;
-                    name.onchange = function() {inst.name = name.value;};
-                    text = document.createTextNode("name:");
-                    name = document.createElement('href');
-
-                    instSpan.appendChild(text);
-                    instSpan.appendChild(name);
-                    for (i = 0; i < inst.numSamples; i += 1) {
-                        sampleA = document.createElement('a');
-                        sampleA.href = '#';
-                        sampleA.innerHTML = "samp_"+i;
-                        sampleA.setAttribute('onclick', 'neuralyteTracker.renderSample(event,'+instNo+','+i+')');
-                        sampSpan = document.createElement('span');
-                        sampSpan.id = 'samp_'+instNo+'_'+i;
-                        instSpan.appendChild(sampSpan);
-                        instSpan.appendChild(sampleA);
+                    var instSpan = document.getElementById('inst_'+instNo);
+                    //name = document.createElement('input');
+                    //name.value = inst.name;
+                    //name.onchange = function() {inst.name = name.value;};
+                    //name = document.createElement('href');
+                    //instSpan.appendChild(name);
+                    var sampView = document.getElementById('sampleView');
+                    for (var i = 0; i < inst.numSamples; i += 1) {
+                        this.renderSample(instNo, i);
+                        //var sampleA = document.createElement('a');
+                        //sampleA.href = '#';
+                        //sampleA.innerHTML = "samp_"+i;
+                        //sampleA.setAttribute('onclick', 'neuralyteTracker.renderSample(event,'+instNo+','+i+')');
+                        //var sampSpan = document.createElement('span');
+                        //sampSpan.id = 'samp_'+instNo+'_'+i;
+                        //sampView.appendChild(sampSpan);
+                        //sampView.appendChild(sampleA);
                     }
+
                 },
-                renderSample: function(evt, instNo, sampNo) {
+                renderSample: function(instNo, sampNo) {
                     samp = mod.instruments[instNo].samples[sampNo];
-                    sampSpan = document.getElementById('samp_' + instNo + '_'+sampNo);
+                    //sampSpan = document.getElementById('samp_' + instNo + '_'+sampNo);
+                    sampView = document.getElementById('sampleView');
+                    while (sampView.hasChildNodes()) {
+                        sampView.removeChild(sampView.lastChild);
+                    }
+                    var sampSpan = document.createElement('span');
+                    sampSpan.id = 'samp_'+instNo+'_'+sampNo;
+                    sampView.appendChild(sampSpan);
 
                     if (!('sampleData' in samp)) {
                         console.log('no sample data, initializing.');
-                        initSize = 1000;
+                        var initSize = 1000;
                         samp.sampleData = new Array(initSize);
                         while (--initSize >= 0) {
                             samp.sampleData[initSize] = 0;
@@ -286,8 +313,15 @@
                     sampCanvas = document.createElement('canvas');
                     sampCanvas.setAttribute('height', 100);
                     sampCanvas.setAttribute('width', 300);
+                    sampCanvas.id = 'samp_' + instNo + '_'+sampNo + '_canvas';
                     sampSpan.appendChild(sampCanvas);
                     drawSample(sampCanvas.getContext('2d'), samp.sampleData);
+
+                    var sampUpload = document.createElement('input');
+                    sampUpload.id = 'samp_'+instNo+'_'+sampNo+'_upload';
+                    sampUpload.type = 'file';
+                    sampUpload.onchange = loadWavFile;
+                    sampSpan.appendChild(sampUpload);
 
                     console.log('sample data is ready for drawing.');
                     
@@ -363,6 +397,35 @@
                 }
 
             }
+            function loadWavFile (evt) {
+                if (document.getElementById(evt.target.id).files.length === 0) { return; }
+                var oFile = document.getElementById(evt.target.id).files[0];
+                var objectURL = window.URL.createObjectURL(oFile);
+                var reader = new FileReader();
+                reader.file = oFile;
+                reader.onload = function (e) {
+                    var file = this.file;
+                    var decoder = new WAVDecoder();
+                    var decoded = decoder.decode(e.target.result);
+                    var scale = Math.pow(2, decoded.bitDepth)/2.0; // divide by to because we are using signed ints.
+                    var modInst = new Array(decoded.length);
+                    for (var i = 0; i < decoded.length; i += 1) {
+                        modInst[i] = Math.round(decoded.channels[0][i]*scale);
+                    }
+                    setSample(modInst, evt.target.id);
+                }
+                reader.readAsBinaryString(oFile);
+            }
+
+            function setSample(dat, idstr) {
+                var n = idstr.split('_');
+                mod.instruments[n[1]].samples[n[2]][0] = {name: 'test name',
+                    sampleData: dat,
+                    volume: 64};
+                var sampCanvas = document.getElementById(n[0] +"_"+ n[1] +"_"+ n[2] +'_canvas');
+                console.log(mod.instruments[n[1]].samples[n[2]][0].sampleData);
+                drawSample(sampCanvas.getContext('2d'), dat);
+            }
 
             function drawSample(ctx, sampData) {
                 var i = 0,
@@ -371,11 +434,12 @@
                     points = sampData.length,
                     pointspx = width/points;
 
+                ctx.clearRect(0, 0, width, height);
                 ctx.beginPath();
                 ctx.strokeStyle = '"rgb(255,165,0)";';
                 ctx.moveTo(0,0);
                 ctx.moveTo(0,height/2+((height*sampData[0])/65534.0));
-                for (pt = 1; pt < points; pt += 1) {
+                for (pt = 1; pt < points; pt += Math.ceil(points/1000)) {
                     ctx.lineTo(pt*(width/points), height/2+((height*sampData[pt])/65534.0));
                 }
                 ctx.stroke();
@@ -398,7 +462,7 @@
             function updateUI(mod) {
                 for (var key in mod) {
                     if (mod.hasOwnProperty(key)) {
-                        node = document.getElementById(key);
+                        var node = document.getElementById(key);
                         if (node != null) {
                             node.value = mod[key];
                         }
@@ -432,12 +496,14 @@
             }
             function getInstSpan(i) {
                 var inst = mod.instruments[i];
-                var instSpan = document.createElement('span');
+                var instSpan = document.createElement('div');
                 instSpan.id = "inst_"+i;
+                instSpan.class = 'instClass';
                 var instA = document.createElement('a');
                 instA.href = "#";
-                instA.innerHTML = "'inst_"+i+"'";
-                instA.setAttribute('onclick', 'neuralyteTracker.renderInstrument(event,'+i+')');
+                instA.innerHTML = rightjustify(i,2)+" "+inst.name;
+                instA.onclick = new Function("neuralyteTracker.renderInstrument("+i+")");
+                //instA.setAttribute('onclick', 'neuralyteTracker.renderInstrument(event,'+i+')');
                 instSpan.appendChild(instA);
                 return instSpan;
             }
@@ -1108,7 +1174,7 @@
         }());
 </script>
     <body onLoad="init();"> 
-        <div id='title'>NeuralyteTracker v0.0.1 <span id='working'></span></div>
+        <div id='title'>NeuralyteTracker v0.1.0 <span id='working'></span></div>
         <div id='modBrowser'>
             load from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
                 <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a> or 
@@ -1128,7 +1194,9 @@
             defaultTempo: <input id='defaultTempo' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
 
         </div>
-        <div id='instrumentView'></div>
+        <div id='instruments'>
+            <div id='instrumentView'></div><div id='sampleView'></div>
+        </div>
         <div id='patternView'></div>
 
 
@@ -1139,7 +1207,7 @@
         <br/>
         <br/>
         <br/>
-        <input id="uploadWav" type="file" name="wav Load" onchange="neuralyteTracker.loadWavFile();" />
+        <!--input id="uploadWav" type="file" name="wav Load" onchange="neuralyteTracker.loadWavFile();" /-->
         <br/>
 
         <span id='trackerUI'>
@@ -1176,6 +1244,7 @@
         </span>
 
 
+        <div id='documentation'>
         <h2>Doc</h2>
 
         The source is the documentation. 
@@ -1196,7 +1265,6 @@
             <tr><td>samples</td><td>X</td><td>TODO</td><td></td><td></td><td>Samples included in instruments.</td></tr>
 
         </table>
-        <input type="file" id="files" name="files[]" multiple /><output id="list"></output>
 
 <script>
 </script>
@@ -1210,5 +1278,6 @@
 
 		...
 
+    </div>
     </body>
 </html>
