@@ -368,7 +368,7 @@ public class TrackerResource {
     	String json = gson.toJson(module);
     	String saveLocation = null;
     	try {
-    		URL url = new URL("http://drainpipe.iriscouch.com/mods");
+    		URL url = new URL("http://drainpipe.iriscouch.com/jsong");
     		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     		conn.setDoOutput(true);
     		conn.setRequestMethod("POST");

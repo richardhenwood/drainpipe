@@ -204,7 +204,7 @@
                 },
                 save: function(storeURL) {
                     startWorking();
-                    storeURL = apiRoot+"/" + apiName + "/save";
+                    var storeURL = apiRoot+"/" + apiName + "/save";
                     console.log("saving: " + storeURL);  
                     xmlhttp.open('GET', storeURL, false); 
                     xmlhttp.send(null);
@@ -214,28 +214,28 @@
                     stopWorking();
                 },
                 play: function() {
-                    playURL = apiRoot+"/" + apiName + "/play";
+                    var playURL = apiRoot+"/" + apiName + "/play";
                     xmlhttp.open('GET', playURL, false); 
                     xmlhttp.send(null);
                     if(xmlhttp.status == 200)
                         console.log("playing: " + playURL);  
                 },
                 pause: function() {
-                    playURL = apiRoot+"/" + apiName + "/stop";
+                    var playURL = apiRoot+"/" + apiName + "/stop";
                     xmlhttp.open('GET', playURL, false); 
                     xmlhttp.send(null);
                     if(xmlhttp.status == 200)
                         console.log("stopped: " + playURL);  
                 },
                 restart: function() {
-                    playURL = apiRoot+"/" + apiName + "/restart";
+                    var playURL = apiRoot+"/" + apiName + "/restart";
                     xmlhttp.open('GET', playURL, false); 
                     xmlhttp.send(null);
                     if(xmlhttp.status == 200)
                         console.log("stopped: " + playURL);  
                 },
                 loopPattern: function(evt, patNo) {
-                    loopUri = apiRoot+'/' + apiName + "/pattern/" + patNo + "/play";
+                    var loopUri = apiRoot+'/' + apiName + "/pattern/" + patNo + "/play";
                     xmlhttp.open('GET', loopUri, false); 
                     xmlhttp.send(null);
                     if(xmlhttp.status == 200)
@@ -274,8 +274,8 @@
 
                 },
                 renderSample: function(instNo, sampNo) {
-                    samp = mod.instruments[instNo].samples[sampNo];
-                    sampView = document.getElementById('sampleView');
+                    var samp = mod.instruments[instNo].samples[sampNo];
+                    var sampView = document.getElementById('sampleView');
                     while (sampView.hasChildNodes()) {
                         sampView.removeChild(sampView.lastChild);
                     }
@@ -308,25 +308,25 @@
                     console.log('sample data is ready for drawing.');
                 },
                 renderPattern: function(evt, patNo) {
-                    pat = mod.patterns[patNo];
+                    var pat = mod.patterns[patNo];
                     // there is a span already in the pattern
                     // dom object because one is created 
                     // in the 'private' method 'updateUI'.
                     // This design is terriable and should be
                     // fixed.
-                    patSpan = document.getElementById('pat_' + patNo);
+                    var patSpan = document.getElementById('pat_' + patNo);
                     console.log("rendering pattern: " + patNo);
                     //console.log(pat);
                     var patTable = document.createElement('table');
                     patTable.id = "pat_"+patNo+"_table";
-                    for (row = 0; row < pat.numRows; row += 1) {
-                        tr = document.createElement('tr');
-                        rowtd = document.createElement('td');
+                    for (var row = 0; row < pat.numRows; row += 1) {
+                        var tr = document.createElement('tr');
+                        var rowtd = document.createElement('td');
                         rowtd.class = 'pat_row';
                         rowtd.innerHTML = row.toString(16);
                         tr.appendChild(rowtd);
-                        for (chan = 0; chan < mod.numChannels; chan += 1) { 
-                            td = getRow(patNo, pat, row, chan, mod.numChannels);
+                        for (var chan = 0; chan < mod.numChannels; chan += 1) { 
+                            var td = getRow(patNo, pat, row, chan, mod.numChannels);
                             td.id = "cell_"+ patNo+ "_" + row + "_" + chan;
                             td.onchange = this.noteChange;
                             tr.appendChild(td);
@@ -334,15 +334,15 @@
                         patTable.appendChild(tr);
                     }
                     patSpan.appendChild(patTable);
-                    patExpander = document.getElementById('pat_' + patNo+'_expander');
+                    var patExpander = document.getElementById('pat_' + patNo+'_expander');
                     patExpander.innerHTML = '-';
                     patExpander.setAttribute('onclick', 'neuralyteTracker.removePattern(event,'+patNo+')');
                     console.log(patExpander);
                 },
                 removePattern: function (evt, patNo) {
-                    patTable = document.getElementById('pat_' + patNo +'_table');
+                    var patTable = document.getElementById('pat_' + patNo +'_table');
                     patTable.parentNode.removeChild(patTable);
-                    patExpander = document.getElementById('pat_' + patNo+'_expander');
+                    var patExpander = document.getElementById('pat_' + patNo+'_expander');
                     patExpander.innerHTML = '+';
                     patExpander.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+patNo+')');
                 },
@@ -350,31 +350,41 @@
                     var bits, pat, row, chan, dataidx, celldiv;
 
                     evt = evt || window.event;
-                    log(evt);
+                    console.log(evt);
                     bits = evt.currentTarget.id.split('_');
                     pat = bits[1];
                     row = bits[2];
                     chan = bits[3];
                     //celldiv = document.getElementById(evt.currentTarget.id),
-                    dataidx = parseInt((row * patterns[pat].numRows) + chan);
+                    dataidx = parseInt((row * mod.patterns[pat].numRows) + chan);
 
                     if (evt.target.className == "note") {
-                        patterns[pat].data[dataidx][0] = evt.target.value.replace(".","");
+                        mod.patterns[pat].data[dataidx][0] = evt.target.value.replace(".","");
                     }
                     if (evt.target.className == "inst") {
-                        patterns[pat].data[dataidx][1] = parseInt(evt.target.value.replace(".",""));
+                        mod.patterns[pat].data[dataidx][1] = parseInt(evt.target.value.replace(".",""));
                     }
                     if (evt.target.className == "vol") {
-                        patterns[pat].data[dataidx][2] = parseInt(evt.target.value.replace(".",""));
+                        mod.patterns[pat].data[dataidx][2] = parseInt(evt.target.value.replace(".",""));
                     }
                     if (evt.target.className == "type") {
-                        patterns[pat].data[dataidx][3] = parseInt(evt.target.value.replace(".",""));
+                        mod.patterns[pat].data[dataidx][3] = parseInt(evt.target.value.replace(".",""));
                     }
                     if (evt.target.className == "effval") {
-                        patterns[pat].data[dataidx][4] = parseInt(evt.target.value.replace(".",""));
+                        mod.patterns[pat].data[dataidx][4] = parseInt(evt.target.value.replace(".",""));
                     }
-                    put_pattern(pat, patterns[pat]);
-                    
+                    neuralyteTracker.putPattern(pat, mod.patterns[pat]);
+                },
+                putPattern: function (patNo, patDat) {
+                    startWorking();
+                    var putPatURL = apiRoot+"/" + apiName + "/pattern/" + patNo;
+                    xmlhttp.open('POST', putPatURL, false); 
+                    xmlhttp.send(JSON.stringify(patDat));
+                    if(xmlhttp.status == 200)
+                        console.log(putPatURL);      
+                    //modglobals = eval("("+xmlhttp.responseText+")");
+                    console.log("pattern updated");
+                    stopWorking();
                 }
             }
             function loadWavFile (evt) {
@@ -399,11 +409,18 @@
 
             function setSample(dat, idstr) {
                 var n = idstr.split('_');
-                mod.instruments[n[1]].samples[n[2]][0] = {name: 'test name',
+                mod.instruments[n[1]].samples[n[2]] = {name: 'test name',
+                    c2Rate: 8363,
+                    fineTune: 0,
+                    loopLength: 0,
+                    loopStart: 0,
+                    panning: -1,
+                    relNote: 0,
                     sampleData: dat,
                     volume: 64};
                 var sampCanvas = document.getElementById(n[0] +"_"+ n[1] +"_"+ n[2] +'_canvas');
                 //console.log(mod.instruments[n[1]].samples[n[2]][0].sampleData);
+                console.log('new sample data is set. inst ' + n[1] + ' sample ' + n[2]);
                 drawSample(sampCanvas.getContext('2d'), dat);
             }
 
@@ -419,7 +436,7 @@
                 ctx.strokeStyle = '"rgb(255,165,0)";';
                 ctx.moveTo(0,0);
                 ctx.moveTo(0,height/2+((height*sampData[0])/65534.0));
-                for (pt = 1; pt < points; pt += Math.ceil(points/1000)) {
+                for (var pt = 1; pt < points; pt += Math.ceil(points/1000)) {
                     ctx.lineTo(pt*(width/points), height/2+((height*sampData[pt])/65534.0));
                 }
                 ctx.stroke();
@@ -495,6 +512,7 @@
                 count = 0,
                 i = 0,
                 row = null,
+                rowidx,
                 td = document.createElement('td'),
                 note = document.createElement('input'),
                 inst = document.createElement('input'),
@@ -583,7 +601,7 @@
         <div id='title'>NeuralyteTracker v0.1.0 <span id='working'></span>mod target: <span id='targetpath'></span></div>
         <span id='trackerUI'>
         <div id='modBrowser'>
-            load from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
+            load {xm,s3m,mod,jsong} from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
                 <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a> or 
                     <a href='#' class='but' onClick='neuralyteTracker.new();'>new</a> <br/>
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a>
