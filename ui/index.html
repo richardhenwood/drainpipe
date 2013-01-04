@@ -22,6 +22,10 @@
     <script language='javascript' src="https://raw.github.com/oampo/audiofile.js/master/audiofile.js"></script>
 
     <style type="text/css">
+        #working {
+            display: inline-block;
+            width: 140px;
+        }
         #patterns table {
             border: 10px;
             width: 100%;
@@ -145,6 +149,7 @@
             //var mod = null; //uncomment this to make it private
             var readURL = null;
             var xmlhttp = new XMLHttpRequest();
+            var targetpath = null;
             var apiName = "";
             var apiRoot = document.location.href.split("#")[0];
             var writeRoot = document.location.href.split("#")[0];
@@ -169,10 +174,13 @@
                     if(xmlhttp.status == 200) {
                         console.log("new jsong created");
                         console.log(xmlhttp.responseText);
+                        targetpath = eval("("+xmlhttp.responseText+")").location;
                     }
                     else {
                         console.log("can not create new jsong");
                     }
+                    document.getElementById('loadURL').value = targetpath;
+                    this.load('loadURL');
                     console.log("load complete");
                     stopWorking();
                 },
@@ -180,6 +188,7 @@
                     startWorking();
                     readURL = document.getElementById(id).value;
                     console.log("loading: " + readURL);  
+                    targetpath = readURL;
                     apiName = encodeURIComponent(readURL);
                     readRoot = apiRoot+"/"+apiName+"";
                     xmlhttp.open('GET', readRoot, false); 
@@ -307,11 +316,15 @@
                     // fixed.
                     patSpan = document.getElementById('pat_' + patNo);
                     console.log("rendering pattern: " + patNo);
-                    console.log(pat);
+                    //console.log(pat);
                     var patTable = document.createElement('table');
                     patTable.id = "pat_"+patNo+"_table";
                     for (row = 0; row < pat.numRows; row += 1) {
                         tr = document.createElement('tr');
+                        rowtd = document.createElement('td');
+                        rowtd.class = 'pat_row';
+                        rowtd.innerHTML = row.toString(16);
+                        tr.appendChild(rowtd);
                         for (chan = 0; chan < mod.numChannels; chan += 1) { 
                             td = getRow(patNo, pat, row, chan, mod.numChannels);
                             td.id = "cell_"+ patNo+ "_" + row + "_" + chan;
@@ -390,7 +403,7 @@
                     sampleData: dat,
                     volume: 64};
                 var sampCanvas = document.getElementById(n[0] +"_"+ n[1] +"_"+ n[2] +'_canvas');
-                console.log(mod.instruments[n[1]].samples[n[2]][0].sampleData);
+                //console.log(mod.instruments[n[1]].samples[n[2]][0].sampleData);
                 drawSample(sampCanvas.getContext('2d'), dat);
             }
 
@@ -422,6 +435,8 @@
             }
             function stopWorking() {
                 var node = document.getElementById('working');
+                var targetpathspan = document.getElementById('targetpath');
+                targetpathspan.innerHTML = targetpath;
                 while (node.hasChildNodes()) {
                     node.removeChild(node.lastChild);
                 }
@@ -565,7 +580,7 @@
 
 </script>
     <body onLoad="init();"> 
-        <div id='title'>NeuralyteTracker v0.1.0 <span id='working'></span></div>
+        <div id='title'>NeuralyteTracker v0.1.0 <span id='working'></span>mod target: <span id='targetpath'></span></div>
         <span id='trackerUI'>
         <div id='modBrowser'>
             load from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
@@ -599,7 +614,6 @@
         <br/>
         <br/>
         <br/>
-        <!--input id="uploadWav" type="file" name="wav Load" onchange="neuralyteTracker.loadWavFile();" /-->
         <br/>
         <span>
 
@@ -607,6 +621,8 @@
         <h2>Doc</h2>
 
         The source is the documentation. 
+
+        pattern cells are in order, left to right: note, inst, vol, eff, effval.
 
         I couldn't get a webserver configured to serve static pages so i've hacked it to lookup this page.<p/>
         Currently supported endpoints - all assume /drainpipe/&lt;encoded uri to mod&gt;/
