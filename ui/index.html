@@ -454,6 +454,9 @@
                 var node = document.getElementById('working');
                 var targetpathspan = document.getElementById('targetpath');
                 targetpathspan.innerHTML = targetpath;
+                rmChildren(node);
+            }
+            function rmChildren(node) {
                 while (node.hasChildNodes()) {
                     node.removeChild(node.lastChild);
                 }
@@ -468,6 +471,7 @@
                     }
                 }
                 var patternView = document.getElementById('patternView');
+                rmChildren(patternView);
                 for (var i = 0; i < mod.patterns.length; i+=1) {
                     var pat = mod.patterns[i];
                     var patSpan = document.createElement('span');
@@ -489,6 +493,7 @@
                     patternView.appendChild(patSpan);
                 }
                 var instrumentView = document.getElementById('instrumentView');
+                rmChildren(instrumentView);
                 for (var i = 0; i < mod.instruments.length; i += 1) {
                     instrumentView.appendChild(getInstSpan(i));
                 }
