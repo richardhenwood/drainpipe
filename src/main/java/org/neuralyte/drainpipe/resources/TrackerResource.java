@@ -21,6 +21,7 @@ package org.neuralyte.drainpipe.resources;
 import ibxm.Instrument;
 import ibxm.Module;
 import ibxm.Pattern;
+import ibxm.Sample;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -153,7 +154,7 @@ public class TrackerResource {
     
     @GET @Path("{songname}")
     @Produces("text/plain")
-    public String getSongRoot(@PathParam("songname") String songName) throws IOException {
+    public String getJsongRoot(@PathParam("songname") String songName) throws IOException {
     	System.out.println("get:");
     	System.out.println("'"+songName+"'");
     	
@@ -167,29 +168,40 @@ public class TrackerResource {
     	}
 
     	Module mod = tracker.getPlayer().getModule();
-    	//JSONObject json = JSONObject.fromObject(mod, jsonConfig);
-    	//String out = json.toString();
     	
     	Gson gson = new Gson();
     	String json = gson.toJson(mod);
     	return json;
-        //return "Hello world: " + songName;
     }
     
     @GET @Path("{songname}/play")
     @Produces("text/plain")
-    public String playmod(@PathParam("songname") String songName) throws IOException {
+    public String playJsong(@PathParam("songname") String songName) throws IOException {
     	if (tracker == null) {
-    		this.getSongRoot(songName);
+    		this.getJsongRoot(songName);
     	}
     	tracker.play();
-    	tracker.getPlayer().getSpeed();
+    	
     	return "playing.";
+    }
+    
+    @GET @Path("{songname}/status")
+    @Produces("text/plain")
+    public String getstatus(@PathParam("songname") String songName) {
+    	int speed = tracker.getPlayer().getSpeed();
+    	int ticklen = tracker.getPlayer().getTickLen();
+    	int pattern = tracker.getPlayer().getCurrentPattern();
+    	int row = tracker.getPlayer().getCurrentRow();
+    	return "{'speed': " + speed
+    			+ ", 'ticklen': " + ticklen
+    			+ ", 'pattern': " + pattern 
+    			+ ", 'row': " + row 
+    			+ "}"; 
     }
     
     @GET @Path("{songname}/restart")
     @Produces("text/plain")
-    public String restartmod(@PathParam("songname") String songName) {
+    public String restartJsong(@PathParam("songname") String songName) {
 
     	//Tracker tracker = Tracker.getInstance();
     	tracker.restart();
@@ -198,7 +210,7 @@ public class TrackerResource {
     
     @GET @Path("{songname}/stop")
     @Produces("text/plain")
-    public String stopmod(@PathParam("songname") String songName) {
+    public String stopJsong(@PathParam("songname") String songName) {
 
     	//Tracker tracker = Tracker.getInstance();
     	tracker.stop();
@@ -219,6 +231,7 @@ public class TrackerResource {
     @POST @Path("{songname}/global_volume")
     @Produces("application/json")
     public String global_volume(@PathParam("songname") String songName, String incomingJson) {
+       	Tracker tracker = Tracker.getInstance();
 
     	//Tracker tracker = Tracker.getInstance();
     	tracker.getPlayer().getModule().defaultGVol = Integer.parseInt(incomingJson);
@@ -242,7 +255,8 @@ public class TrackerResource {
     @POST @Path("{songname}/sequence")
     @Produces("application/json")
     public String sequence(@PathParam("songname") String songName, String incomingJson) {
-    	
+       	Tracker tracker = Tracker.getInstance();
+       	
     	//incomingJson = incomingJson.substring(1, incomingJson.length() - 1);    	
     	//JSONArray json = (JSONArray) JSONSerializer.toJSON( incomingJson ); 
     	Gson gson = new Gson();
@@ -282,7 +296,7 @@ public class TrackerResource {
     public String patternPlay(@PathParam("songname") String songName, @PathParam("patNo") int patNo) throws IOException {
 
     	if (tracker == null) {
-    		this.getSongRoot(songName);
+    		this.getJsongRoot(songName);
     	}
     	if (!tracker.isPlaying()) {
     		tracker.play();
@@ -306,9 +320,6 @@ public class TrackerResource {
     public String pattern(@PathParam("songname") String songName, @PathParam("patNo") int patNo, String incomingJson) {
        	Tracker tracker = Tracker.getInstance();
     	    	
-    	//JSONObject json = (JSONObject) JSONObject.fromObject( incomingJson, jsonConfig ); 
-    	//Pattern pat = (Pattern)JSONObject.toBean(json, Pattern.class);
-    	
     	Gson gson = new Gson();
     	Pattern pat = gson.fromJson(incomingJson, Pattern.class);
     	tracker.getPlayer().getModule().setPattern(pat);
@@ -316,13 +327,43 @@ public class TrackerResource {
     	System.out.println("pattern updated: " + tracker.getPlayer().getModule().getPattern(patNo).toString());
     	return pat.toString();
     }
+    
+    @POST @Path("{songname}/instrument/{instNo}")
+    @Produces("application/json")
+    public String instrument(@PathParam("songname") String songName, @PathParam("instNo") int instNo, String incomingJson) {
+    	Tracker tracker = Tracker.getInstance();
     	
+    	Gson gson = new Gson();
+    	Instrument inst = gson.fromJson(incomingJson, Instrument.class);
+    	tracker.getPlayer().getModule().setInstrument(inst, instNo);
+    	
+    	System.out.println("instrument updated: " + tracker.getPlayer().getModule().getInstrument(instNo).toString());
+    	return inst.toString();
+    }
+    
+    @POST @Path("{songname}/instrument/{instNo}/sample/{sampNo}")
+    @Produces("application/json")
+    public String sample(@PathParam("songname") String songName, 
+    		@PathParam("instNo") int instNo, 
+    		@PathParam("sampNo") int sampNo, 
+    		String incomingJson) {
+    	Tracker tracker = Tracker.getInstance();
+    	
+    	Gson gson = new Gson();
+    	Sample sampDat = gson.fromJson(incomingJson, Sample.class);
+    	tracker.getPlayer().getModule().setSample(instNo, sampNo, sampDat);
+    	
+    	System.out.println("sample updated: " + tracker.getPlayer().getModule().getInstrument(instNo).toString());
+    	return sampDat.toString();
+    }
+    
     @POST @Path("{songname}/patterns")
     @Produces("application/json")
     public String patterns(@PathParam("songname") String songName, String incomingJson) {
-    	int[] seq = null;
-    	String[] strSeq = null;
+    	//int[] seq = null;
+    	//String[] strSeq = null;
     	//Tracker tracker = Tracker.getInstance();
+       	Tracker tracker = Tracker.getInstance();
     	
     	Gson gson = new Gson();
     	Pattern[] pats = gson.fromJson(incomingJson, Pattern[].class);
@@ -411,7 +452,9 @@ public class TrackerResource {
     
     @POST @Path("{songname}/save")
     @Produces("application/json")
-    public String save(@PathParam("songname") String songName, String incomingJson) {
+    public String save(@PathParam("songname") String songName, String incomingJson) {       	
+    	Tracker tracker = Tracker.getInstance();
+    	
     	Gson gson = new Gson();
     	Module mod = gson.fromJson(incomingJson, Module.class);
     	tracker.getPlayer().setModule(mod);

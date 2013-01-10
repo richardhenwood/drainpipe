@@ -172,9 +172,20 @@ public class Player {
 		
 	}
 
-	public void getSpeed() {
-		System.out.println("speed: " + ibxm.getSpeed() + " ticklen: " + ibxm.getTickLen());
+	public int getSpeed() {
+		return ibxm.getSpeed();
 		// TODO Auto-generated method stub
 		
+	}
+	public int getTickLen() {
+	 	return ibxm.getTickLen();
+	}
+
+	public int getCurrentPattern() {
+		return this.ibxm.getCurrentPattern();
 	}	
+	
+	public int getCurrentRow() {
+		return this.ibxm.getCurrentRow();
+	}
 }

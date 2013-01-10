@@ -175,6 +175,7 @@
                         console.log("new jsong created");
                         console.log(xmlhttp.responseText);
                         targetpath = eval("("+xmlhttp.responseText+")").location;
+                        mod = null;
                     }
                     else {
                         console.log("can not create new jsong");
@@ -213,6 +214,9 @@
                     modglobals = eval("("+xmlhttp.responseText+")");
                     stopWorking();
                 },
+                saveJsong: function() {
+                    window.open( "data:text/json;charset=utf-8," + escape(JSON.stringify(mod)))
+                },
                 play: function() {
                     var playURL = apiRoot+"/" + apiName + "/play";
                     xmlhttp.open('GET', playURL, false); 
@@ -246,10 +250,18 @@
                     updateUI(mod);
                     stopWorking();
                 },
+                getStatus: function() {
+                    var statusUri = apiRoot+'/' + apiName + "/status";
+                    xmlhttp.open('GET', statusUri, false); 
+                    xmlhttp.send(null);
+                    if(xmlhttp.status == 200)
+                        console.log(statusUri);      
+                    currentStatus = eval("("+xmlhttp.responseText+")");
+                },
                 updateMod: function(evt) {
                    if (evt.keyCode == 13) {
                        mod[evt.target.id] = document.getElementById(evt.target.id).value;
-                       putMod();
+                       neuralyteTracker.putMod();
                    }
                 },
                 putMod: function() {
@@ -351,29 +363,39 @@
 
                     evt = evt || window.event;
                     console.log(evt);
+                    //console.log(evt.currentTarget.childNodes[0].value);
                     bits = evt.currentTarget.id.split('_');
                     pat = bits[1];
                     row = bits[2];
                     chan = bits[3];
-                    //celldiv = document.getElementById(evt.currentTarget.id),
-                    dataidx = parseInt((row * mod.patterns[pat].numRows) + chan);
+                    dataidx = parseInt((row * mod.numChannels) + parseInt(chan));
 
-                    if (evt.target.className == "note") {
-                        mod.patterns[pat].data[dataidx][0] = evt.target.value.replace(".","");
-                    }
-                    if (evt.target.className == "inst") {
-                        mod.patterns[pat].data[dataidx][1] = parseInt(evt.target.value.replace(".",""));
-                    }
-                    if (evt.target.className == "vol") {
-                        mod.patterns[pat].data[dataidx][2] = parseInt(evt.target.value.replace(".",""));
-                    }
-                    if (evt.target.className == "type") {
-                        mod.patterns[pat].data[dataidx][3] = parseInt(evt.target.value.replace(".",""));
-                    }
-                    if (evt.target.className == "effval") {
-                        mod.patterns[pat].data[dataidx][4] = parseInt(evt.target.value.replace(".",""));
-                    }
+                    console.log("before:");
+                    console.log("row: " + row + " pat: " + pat + " chan: " + chan + " dataidx: " + dataidx);
+                    console.log(mod.patterns[pat].data[dataidx]);
+                    mod.patterns[pat].data[dataidx] = eval("new Array("+evt.currentTarget.childNodes[0].value+");");
+                    console.log("after :");
+                    console.log(mod.patterns[pat].data[dataidx]);
                     neuralyteTracker.putPattern(pat, mod.patterns[pat]);
+                    
+                    //celldiv = document.getElementById(evt.currentTarget.id),
+
+                    //if (evt.target.className == "note") {
+                    //    mod.patterns[pat].data[dataidx][0] = evt.target.value.replace(".","");
+                    //}
+                    //if (evt.target.className == "inst") {
+                    //    mod.patterns[pat].data[dataidx][1] = parseInt(evt.target.value.replace(".",""));
+                    //}
+                    //if (evt.target.className == "vol") {
+                    //    mod.patterns[pat].data[dataidx][2] = parseInt(evt.target.value.replace(".",""));
+                    //}
+                    //if (evt.target.className == "type") {
+                    //    mod.patterns[pat].data[dataidx][3] = parseInt(evt.target.value.replace(".",""));
+                    //}
+                    //if (evt.target.className == "effval") {
+                    //    mod.patterns[pat].data[dataidx][4] = parseInt(evt.target.value.replace(".",""));
+                    //}
+                    //neuralyteTracker.putPattern(pat, mod.patterns[pat]);
                 },
                 putPattern: function (patNo, patDat) {
                     startWorking();
@@ -384,6 +406,17 @@
                         console.log(putPatURL);      
                     //modglobals = eval("("+xmlhttp.responseText+")");
                     console.log("pattern updated");
+                    stopWorking();
+                }
+                putSample: function (instNo, sampNo, sampDat) {
+                    startWorking();
+                    var putSampURL = apiRoot+"/" + apiName + "/instrument/" + instNo + "/sample/" + sampNo;
+                    xmlhttp.open('POST', putSampURL, false); 
+                    xmlhttp.send(sampDat);
+                    if(xmlhttp.status == 200)
+                        console.log(putSampURL);      
+                    //modglobals = eval("("+xmlhttp.responseText+")");
+                    console.log("sample updated");
                     stopWorking();
                 }
             }
@@ -409,7 +442,7 @@
 
             function setSample(dat, idstr) {
                 var n = idstr.split('_');
-                mod.instruments[n[1]].samples[n[2]] = {name: 'test name',
+                var sampJson = {name: 'test name',
                     c2Rate: 8363,
                     fineTune: 0,
                     loopLength: 0,
@@ -418,10 +451,12 @@
                     relNote: 0,
                     sampleData: dat,
                     volume: 64};
+                mod.instruments[n[1]].samples[n[2]] = sampJson;
                 var sampCanvas = document.getElementById(n[0] +"_"+ n[1] +"_"+ n[2] +'_canvas');
                 //console.log(mod.instruments[n[1]].samples[n[2]][0].sampleData);
                 console.log('new sample data is set. inst ' + n[1] + ' sample ' + n[2]);
                 drawSample(sampCanvas.getContext('2d'), dat);
+                neuralyteTracker.putSample(n[1], n[2], sampJson);
             }
 
             function drawSample(ctx, sampData) {
@@ -494,7 +529,7 @@
                 }
                 var instrumentView = document.getElementById('instrumentView');
                 rmChildren(instrumentView);
-                for (var i = 0; i < mod.instruments.length; i += 1) {
+                for (var i = 1; i < mod.instruments.length; i += 1) {
                     instrumentView.appendChild(getInstSpan(i));
                 }
             }
@@ -527,6 +562,12 @@
 
                 rowidx = (rowNum * numChannels) + chanNum;
                 row = pattern.data[rowidx];
+
+                rowinput = document.createElement('input');
+                rowinput.value = row;
+                //rowinput.onchange = new Function(console.log(rowinput));
+                td.appendChild(rowinput)
+                return td;
 
                 note.type = 'type';
                 note.size = 3;
@@ -610,8 +651,12 @@
                 <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a> or 
                     <a href='#' class='but' onClick='neuralyteTracker.new();'>new</a> <br/>
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a>
-            <a href='#' id='putMod' type='text' class='but' onClick='neuralyteTracker.putMod("");'>pushJsong</a>
-            <a href='#' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a>
+            <span id='debug'>
+                <a href='#' id='putMod' type='text' class='but' onClick='neuralyteTracker.putMod("");'>pushJsong</a>
+                <a href='#' type='text' class='but' onClick='neuralyteTracker.saveJsong("");'>saveJsong</a>
+                <a href='#' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a>
+                <a href='#' type='text' class='but' onClick='neuralyteTracker.getStatus("");'>get status</a>
+            </span>
         </div>
         <span id='rendercontrols'>
             <a href='#' class='but' id='playbutton' onClick='neuralyteTracker.play();'>play</a><br/>
@@ -622,6 +667,7 @@
             gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/></br>
             defaultSpeed: <input id='defaultSpeed' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/></br>
             defaultTempo: <input id='defaultTempo' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
+            sequence: <input id='sequence' type='text' size='15' onkeypress="neuralyteTracker.updateMod(event)"/>
 
         </div>
         <div id='instruments'>

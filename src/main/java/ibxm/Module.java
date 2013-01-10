@@ -551,5 +551,13 @@ public class Module {
 	public void fireNewSequence() {
 		this.listener.setSequence(this.sequence);
 	}*/
+
+	public void setInstrument(Instrument inst, int index) {
+		this.instruments[index] = inst;
+	}
+
+	public void setSample(int instNo, int sampNo, Sample sampDat) {
+		this.getInstrument(instNo).samples[sampNo] = sampDat;
+	}
 	
 }

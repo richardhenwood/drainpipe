@@ -27,6 +27,7 @@ public class IBXM {
 	private Note note;
 	private boolean loopPattern;
 	private int loopPatternNo;
+	private int currentPatternPlaying;
 
 	/*
 		Initialise the replay to play the
@@ -74,28 +75,6 @@ public class IBXM {
 		setSequencePos( 0 );
 	}
 	
-	public Module getModule() {
-		return this.module;
-	}
-
-	/* Return the sampling rate of playback. */
-	public int getSampleRate() {
-		return sampleRate;
-	}
-
-	/*
-		Set the resampling quality to one of
-		Channel.NEAREST, Channel.LINEAR, or Channel.SINC.
-	*/
-	public void setInterpolation( int interpolation ) {
-		this.interpolation = interpolation;
-	}
-
-	/* Returns the minimum size of the buffer required by getAudio(). */
-	public int getMixBufferLength() {
-		return ( sampleRate * OVERSAMPLE * 5 / 32 ) + ( rampLen * 2 );
-	}
-
 	/* Set the pattern in the sequence to play. The tempo is reset to the default. */
 	public void setSequencePos( int pos ) {
 		if( pos >= module.sequenceLength ) pos = 0;
@@ -127,6 +106,28 @@ public class IBXM {
 		filtL = filtR = 0;
 		tick();
 		
+	}
+
+	public Module getModule() {
+		return this.module;
+	}
+
+	/* Return the sampling rate of playback. */
+	public int getSampleRate() {
+		return sampleRate;
+	}
+
+	/*
+		Set the resampling quality to one of
+		Channel.NEAREST, Channel.LINEAR, or Channel.SINC.
+	*/
+	public void setInterpolation( int interpolation ) {
+		this.interpolation = interpolation;
+	}
+
+	/* Returns the minimum size of the buffer required by getAudio(). */
+	public int getMixBufferLength() {
+		return ( sampleRate * OVERSAMPLE * 5 / 32 ) + ( rampLen * 2 );
 	}
 
 	/* Returns the song duration in samples at the current sampling rate. */
@@ -270,6 +271,7 @@ public class IBXM {
 		if (this.loopPattern) {
 			pattern = module.getPattern(this.loopPatternNo);
 		}
+		this.currentPatternPlaying = pattern.patNumber;
 		row = nextRow;
 		if( row >= pattern.numRows ) row = 0;
 		nextRow = row + 1;
@@ -361,5 +363,14 @@ public class IBXM {
 	}
 	public int getTickLen() {
 		return this.tickLen;
+	}
+
+	public int getCurrentPattern() {
+		// TODO Auto-generated method stub
+		return this.currentPatternPlaying;
+	}
+	
+	public int getCurrentRow() {
+		return this.row;
 	}
 }
