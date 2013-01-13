@@ -1,6 +1,8 @@
 
 package ibxm;
 
+import java.util.ArrayList;
+
 
 public class Module {
 	public String songName = "Blank";
@@ -12,7 +14,7 @@ public class Module {
 	public int[] defaultPanning = { 51, 204, 204, 51 };
 	private int[] sequence = { 0 };
 	private Pattern[] patterns = { new Pattern( 4, 64, 0 ) };
-	private Instrument[] instruments = { new Instrument(), new Instrument() };
+	private ArrayList<Instrument> instruments = new ArrayList<Instrument>();//{ new Instrument(), new Instrument() };
 	private IBXM listener;
 
 	private static final int[] keyToPeriod = {
@@ -23,6 +25,9 @@ public class Module {
 	public Module() {}
 	
 	public Module( byte[] moduleData ) {
+		// init a couple of instruments for convienience.
+		//instruments.add(new Instrument());
+		//instruments.add(new Instrument());
 		if( isoLatin1( moduleData, 0, 17 ).equals( "Extended Module: " ) ) {
 			loadXM( moduleData );
 		} else if( isoLatin1( moduleData, 44, 4 ).equals( "SCRM" ) ) {
@@ -123,10 +128,11 @@ public class Module {
 			}
 		}
 		numInstruments = 31;
-		instruments = new Instrument[ numInstruments + 1 ];
-		instruments[ 0 ] = new Instrument();
+		// init the first instrument empty.
+		instruments.add(new Instrument());
 		for( int instIdx = 1; instIdx <= numInstruments; instIdx++ ) {
-			Instrument instrument = instruments[ instIdx ] = new Instrument();
+			instruments.add(new Instrument());
+			Instrument instrument = instruments.get(instIdx);
 			Sample sample = instrument.samples[ 0 ];
 			instrument.name = isoLatin1( moduleData, instIdx * 30 - 10, 22 );
 			int sampleLength = ushortbe( moduleData, instIdx * 30 + 12 ) * 2;
@@ -181,10 +187,15 @@ public class Module {
 		for( int seqIdx = 0; seqIdx < sequenceLength; seqIdx++ )
 			sequence[ seqIdx ] = moduleData[ 96 + seqIdx ] & 0xFF;
 		int moduleDataIdx = 96 + sequenceLength;
-		instruments = new Instrument[ numInstruments + 1 ];
-		instruments[ 0 ] = new Instrument();
+		//instruments = new Instrument[ numInstruments + 1 ];
+		//instruments[ 0 ] = new Instrument();
+
+		// init the first instrument empty.
+		instruments.add(new Instrument());
 		for( int instIdx = 1; instIdx <= numInstruments; instIdx++ ) {
-			Instrument instrument = instruments[ instIdx ] = new Instrument();
+			instruments.add(new Instrument());
+			Instrument instrument = instruments.get(instIdx);
+			//Instrument instrument = instruments[ instIdx ] = new Instrument();
 			Sample sample = instrument.samples[ 0 ];
 			int instOffset = ushortle( moduleData, moduleDataIdx ) << 4;
 			moduleDataIdx += 2;
@@ -352,12 +363,18 @@ public class Module {
 			}
 			dataOffset = nextOffset;
 		}
-		instruments = new Instrument[ numInstruments + 1 ];
-		instruments[ 0 ] = new Instrument();
+		//instruments = new Instrument[ numInstruments + 1 ];
+		//instruments[ 0 ] = new Instrument();
+		
+
+		// init the first instrument empty.
+		instruments.add(new Instrument());
 		for( int insIdx = 1; insIdx <= numInstruments; insIdx++ ) {
-			Instrument instrument = instruments[ insIdx ] = new Instrument();
+			instruments.add(new Instrument());
+			Instrument instrument = instruments.get(insIdx);
+			///Instrument instrument = instruments[ insIdx ] = new Instrument();
 			instrument.name = codePage850( moduleData, dataOffset + 4, 22 );
-			int numSamples = instrument.numSamples = ushortle( moduleData, dataOffset + 27 );
+			int numSamples = ushortle( moduleData, dataOffset + 27 );
 			if( numSamples > 0 ) {
 				instrument.samples = new Sample[ numSamples ];
 				for( int keyIdx = 0; keyIdx < 96; keyIdx++ )
@@ -508,9 +525,9 @@ public class Module {
 			out.append( "Pattern " + patIdx + ":\n" );
 			patterns[ patIdx ].toStringBuffer( out );
 		}
-		for( int insIdx = 1; insIdx < instruments.length; insIdx++ ) {
+		for( int insIdx = 1; insIdx < instruments.size(); insIdx++ ) {
 			out.append( "Instrument " + insIdx + ":\n" );
-			instruments[ insIdx ].toStringBuffer( out );
+			instruments.get(insIdx).toStringBuffer( out );
 		}
 	}
 
@@ -531,29 +548,30 @@ public class Module {
 		this.patterns = array;
 	}
 	
-	public Instrument[] getInstruments () {
+	public ArrayList<Instrument> getInstruments () {
 		return this.instruments;
 	}
 	public Instrument getInstrument (int i) {
-		return this.instruments[i];
+		while (this.instruments.size() <= i) {
+			instruments.add(new Instrument());
+		}
+		return this.instruments.get(i);
 	}
 
 	public void setPattern(Pattern pat) {
 		this.patterns[pat.patNumber] = pat;
-		// TODO Auto-generated method stub
-		
-	}
-	/*
-	public void registerSequenceListener(IBXM obj) {
-		this.listener = obj;
 	}
 	
-	public void fireNewSequence() {
-		this.listener.setSequence(this.sequence);
-	}*/
-
 	public void setInstrument(Instrument inst, int index) {
-		this.instruments[index] = inst;
+		this.instruments.set(index, inst);
+		// init sample data manually:
+		
+		Sample samp = this.instruments.get(index).samples[0];
+		samp.setSampleData(samp.sampleData, samp.sampleData.length-1, 0, false);
+		//this.instruments[index].samples[0] = samp;
+		//samp.loopStart = samp.sampleData.length - 2;
+		//samp.setSampleData(samp.sampleData, 
+			//	0, samp.sampleData.length, false);
 	}
 
 	public void setSample(int instNo, int sampNo, Sample sampDat) {

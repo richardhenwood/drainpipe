@@ -35,13 +35,15 @@ public class Pattern {
 		this.data = d;
 	}
 
-	public void getNote( int index, Note note ) {
+	public Note getNote( int index ) {
 		int offset = index;
+		Note note = new Note();
 		note.key = data[ offset ][0] & 0xFF;
 		note.instrument = data[ offset ] [ 1 ] & 0xFF;
 		note.volume = data[ offset ][ 2 ] & 0xFF;
 		note.effect = data[ offset ][ 3 ] & 0xFF;
 		note.param = data[ offset ][ 4 ] & 0xFF;
+		return note;
 	}
 	
 	

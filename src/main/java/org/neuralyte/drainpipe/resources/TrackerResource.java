@@ -37,6 +37,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -377,7 +378,7 @@ public class TrackerResource {
     public String instruments(@PathParam("songname") String songName) {
 
     	//Tracker tracker = Tracker.getInstance();
-    	Instrument[] insts = tracker.getPlayer().getModule().getInstruments();
+    	ArrayList<Instrument> insts = tracker.getPlayer().getModule().getInstruments();
     	//Object[] inst = tracker.get_module().get_instruments();
     	//JSONArray json = JSONArray.fromObject(inst, jsonConfig);
     	//String out = json.toString();

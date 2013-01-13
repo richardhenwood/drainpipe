@@ -277,13 +277,23 @@
                 },
                 renderInstrument: function(instNo) {
                     var inst = mod.instruments[instNo];
+                    if (typeof inst == 'undefined') {
+                        inst = mod.instruments[0];
+                        inst.samples = Array(newSample(null, 'new sample'));
+                        mod.instruments[instNo] = inst;
+                    }
                     console.log(inst);
                     var instSpan = document.getElementById('inst_'+instNo);
                     var sampView = document.getElementById('sampleView');
-                    for (var i = 0; i < inst.numSamples; i += 1) {
-                        this.renderSample(instNo, i);
+                    if (inst.samples.length == 0) {
+                        this.renderSample(instNo, 0);
                     }
-
+                    else {
+                        for (var i = 0; i < inst.samples.length; i += 1) {
+                            console.log('rendering sample: ' + i);
+                            this.renderSample(instNo, i);
+                        }
+                    }
                 },
                 renderSample: function(instNo, sampNo) {
                     var samp = mod.instruments[instNo].samples[sampNo];
@@ -407,12 +417,13 @@
                     //modglobals = eval("("+xmlhttp.responseText+")");
                     console.log("pattern updated");
                     stopWorking();
-                }
+                },
                 putSample: function (instNo, sampNo, sampDat) {
                     startWorking();
+                    console.log(sampDat);
                     var putSampURL = apiRoot+"/" + apiName + "/instrument/" + instNo + "/sample/" + sampNo;
                     xmlhttp.open('POST', putSampURL, false); 
-                    xmlhttp.send(sampDat);
+                    xmlhttp.send(JSON.stringify(sampDat));
                     if(xmlhttp.status == 200)
                         console.log(putSampURL);      
                     //modglobals = eval("("+xmlhttp.responseText+")");
@@ -435,22 +446,23 @@
                     for (var i = 0; i < decoded.length; i += 1) {
                         modInst[i] = Math.round(decoded.channels[0][i]*scale);
                     }
-                    setSample(modInst, evt.target.id);
+                    console.log(file);
+                    setSample(modInst, evt.target.id, file.name);
                 }
                 reader.readAsBinaryString(oFile);
             }
 
-            function setSample(dat, idstr) {
+            function setSample(dat, idstr, name) {
                 var n = idstr.split('_');
-                var sampJson = {name: 'test name',
-                    c2Rate: 8363,
-                    fineTune: 0,
-                    loopLength: 0,
-                    loopStart: 0,
-                    panning: -1,
-                    relNote: 0,
-                    sampleData: dat,
-                    volume: 64};
+                var sampJson = {'name': name,
+                    'c2Rate': 8363,
+                    'fineTune': 0,
+                    'loopLength': 0,
+                    'loopStart': dat.length - 1,
+                    'panning': 128,
+                    'relNote': 0,
+                    'sampleData': dat,
+                    'volume': 64};
                 mod.instruments[n[1]].samples[n[2]] = sampJson;
                 var sampCanvas = document.getElementById(n[0] +"_"+ n[1] +"_"+ n[2] +'_canvas');
                 //console.log(mod.instruments[n[1]].samples[n[2]][0].sampleData);
@@ -458,7 +470,25 @@
                 drawSample(sampCanvas.getContext('2d'), dat);
                 neuralyteTracker.putSample(n[1], n[2], sampJson);
             }
-
+            function newSample (dat, name) {
+                if (dat == null)
+                    return {'name': name,
+                        'c2Rate': 8363,
+                        'fineTune': 0,
+                        'loopLength': 0,
+                        'panning': 128,
+                        'relNote': 0,
+                        'volume': 64};
+                return {'name': name,
+                    'c2Rate': 8363,
+                    'fineTune': 0,
+                    'loopLength': 0,
+                    'loopStart': dat.length - 1,
+                    'panning': 128,
+                    'relNote': 0,
+                    'sampleData': dat,
+                    'volume': 64};
+            }
             function drawSample(ctx, sampData) {
                 var i = 0,
                     width = ctx.canvas.width,
@@ -529,12 +559,14 @@
                 }
                 var instrumentView = document.getElementById('instrumentView');
                 rmChildren(instrumentView);
-                for (var i = 1; i < mod.instruments.length; i += 1) {
+                var i;
+                for (i = 1; i < mod.instruments.length; i += 1) {
                     instrumentView.appendChild(getInstSpan(i));
                 }
+                instrumentView.appendChild(getInstSpan(i));
             }
             function getInstSpan(i) {
-                var inst = mod.instruments[i];
+                var inst = mod.instruments[0];
                 var instSpan = document.createElement('div');
                 instSpan.id = "inst_"+i;
                 instSpan.class = 'instClass';

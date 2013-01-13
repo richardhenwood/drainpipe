@@ -7,7 +7,7 @@ import javax.sound.sampled.*;
 
 public class Player {
 	private Thread play_thread;
-	private IBXM ibxm;
+	private static IBXM ibxm;
 	private int SAMPLERATE;
 	public int song_duration;
 	public int play_position;
@@ -30,7 +30,7 @@ public class Player {
 	
 	public Player(int sampleRate, Module mod) {
 		this.SAMPLERATE = sampleRate;
-		this.ibxm = new IBXM(mod, sampleRate);
+		Player.ibxm = new IBXM(mod, sampleRate);
 		try {
 			audioLine = AudioSystem.getSourceDataLine( new AudioFormat( this.SAMPLERATE, 16, 2, true, true ) );
 		} catch (LineUnavailableException e) {
@@ -39,12 +39,12 @@ public class Player {
 		}
 	}
 	
-	private Player() {
+	/*private Player() {
 		this(44100);		
-	}
+	}*/
 	
 	public void loadModule(Module mod) {
-		this.ibxm = new IBXM(mod, this.SAMPLERATE);
+		Player.ibxm = new IBXM(mod, this.SAMPLERATE);
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class Player {
 	}*/
 	
 	public Module getModule () {
-		return this.ibxm.getModule();
+		return Player.ibxm.getModule();
 	}
 	
 	/**
@@ -70,7 +70,7 @@ public class Player {
 	}*/
 	
 	public int seek (int i) {
-		return ibxm.seek(i);
+		return Player.ibxm.seek(i);
 	}
 	
 	/**
@@ -78,14 +78,15 @@ public class Player {
 		If a module is already playing it will be restarted.
 	*/
 	public void play() {
-		ibxm.setLoopPattern(false);
+		Player.ibxm.setLoopPattern(false);
 		stop();
 		play_thread = new Thread( new AudioDriver(SAMPLERATE) );
 		play_thread.start();
+		//running = true;
 	}
 	public void playPattern(int patNo) {
-		ibxm.setLoopPattern(true);
-		ibxm.setLoopPatternNo(patNo);
+		Player.ibxm.setLoopPattern(true);
+		Player.ibxm.setLoopPatternNo(patNo);
 		this.restart();
 		//stop();
 		//play_thread = new Thread( new AudioDriver(SAMPLERATE) );
@@ -106,8 +107,46 @@ public class Player {
 	
 	public void restart() {
 		this.play_position = 0;
-		ibxm.seek(0);
+		Player.ibxm.seek(0);
+		//Player.AudioDriver.
 		System.out.println("restarted");
+	}
+	
+	public void _setInterpolation(int interpolation) {
+		Player.ibxm.setInterpolation(interpolation);
+	}
+
+	public int calculateSongDuration() {
+		return Player.ibxm.calculateSongDuration();
+	}
+
+	public void setSequence(int[] pats) {
+		if (pats.length < Player.ibxm.getSeqpos())
+			Player.ibxm.setSequencePos(pats.length - 1);
+		this.getModule().setSequence(pats);
+	}
+
+	public void setModule(Module mod) {
+		Player.ibxm.setModule(mod, SAMPLERATE);
+		// TODO Auto-generated method stub
+		
+	}
+
+	public int getSpeed() {
+		return Player.ibxm.getSpeed();
+		// TODO Auto-generated method stub
+		
+	}
+	public int getTickLen() {
+	 	return Player.ibxm.getTickLen();
+	}
+
+	public int getCurrentPattern() {
+		return Player.ibxm.getCurrentPattern();
+	}	
+	
+	public int getCurrentRow() {
+		return Player.ibxm.getCurrentRow();
 	}
 	
 	private class AudioDriver implements Runnable {
@@ -122,13 +161,13 @@ public class Player {
 		public void run() {
 			if( running ) return;
 			try {
-                int[] mixBuf = new int[ ibxm.getMixBufferLength() ];
+                int[] mixBuf = new int[ Player.ibxm.getMixBufferLength() ];
                 byte[] outBuf = new byte[ mixBuf.length * 2 ];
 				audioLine.open();
 				audioLine.start();
 				running = true;
 				while( running ) {
-                    int count = ibxm.getAudio( mixBuf );
+                    int count = Player.ibxm.getAudio( mixBuf );
                     int outIdx = 0;
                     for( int mixIdx = 0, mixEnd = count * 2; mixIdx < mixEnd; mixIdx++ ) {
                             int ampl = mixBuf[ mixIdx ];
@@ -151,41 +190,4 @@ public class Player {
 		}
 	}
 
-	public void _setInterpolation(int interpolation) {
-		ibxm.setInterpolation(interpolation);
-		
-	}
-
-	public int calculateSongDuration() {
-		return ibxm.calculateSongDuration();
-	}
-
-	public void setSequence(int[] pats) {
-		if (pats.length < this.ibxm.getSeqpos())
-			this.ibxm.setSequencePos(pats.length - 1);
-		this.getModule().setSequence(pats);
-	}
-
-	public void setModule(Module mod) {
-		this.ibxm.setModule(mod, SAMPLERATE);
-		// TODO Auto-generated method stub
-		
-	}
-
-	public int getSpeed() {
-		return ibxm.getSpeed();
-		// TODO Auto-generated method stub
-		
-	}
-	public int getTickLen() {
-	 	return ibxm.getTickLen();
-	}
-
-	public int getCurrentPattern() {
-		return this.ibxm.getCurrentPattern();
-	}	
-	
-	public int getCurrentRow() {
-		return this.ibxm.getCurrentRow();
-	}
 }

@@ -60,7 +60,8 @@ public class Channel {
 	private Sample sample;
 	private boolean keyOn;
 	private int noteKey, noteIns, noteVol, noteEffect, noteParam;
-	private int sampleIdx, sampleFra, step, ampl, pann;
+	private int sampleIdx;
+	private int sampleFra, step, ampl, pann;
 	private int volume, panning, fadeOutVol, volEnvTick, panEnvTick;
 	private int period, portaPeriod, retrigCount, fxCount, autoVibratoCount;
 	private int portaUpParam, portaDownParam, tonePortaParam, offsetParam;

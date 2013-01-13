@@ -24,7 +24,7 @@ public class IBXM {
 	private int seqPos, breakSeqPos, row, nextRow, tick;
 	private int speed, plCount, plChannel;
 	private GlobalVol globalVol;
-	private Note note;
+	//private Note note;
 	private boolean loopPattern;
 	private int loopPatternNo;
 	private int currentPatternPlaying;
@@ -39,24 +39,7 @@ public class IBXM {
 	
 	public IBXM ( Module module, int sampleRate ) {
 		setModule (module, sampleRate);
-		//module.registerSequenceListener(this);
 	}
-	
-/*	public _IBXM( Module module, int sampleRate ) {
-		this.module = module;
-		this.sampleRate = sampleRate;
-		interpolation = Channel.LINEAR;
-		if( sampleRate * OVERSAMPLE < 16000 )
-			throw new IllegalArgumentException( "Unsupported sampling rate!" );
-		rampLen = 256;
-		while( rampLen * 1024 > sampleRate * OVERSAMPLE ) rampLen /= 2;
-		rampBuffer = new int[ rampLen * 2 ];
-		rampRate = 256 / rampLen;
-		channels = new Channel[ module.numChannels ];
-		//globalVol = new GlobalVol();
-		//note = new Note();
-		setSequencePos( 0 );
-	}*/
 
 	public void setModule (Module module, int sampleRate ) {
 		System.out.println("setModule.");
@@ -71,7 +54,6 @@ public class IBXM {
 		rampRate = 256 / rampLen;
 		channels = new Channel[ module.numChannels ];
 		globalVol = new GlobalVol();
-		note = new Note();
 		setSequencePos( 0 );
 	}
 	
@@ -85,13 +67,14 @@ public class IBXM {
 		speed = module.defaultSpeed > 0 ? module.defaultSpeed : 6;
 		setTempo( module.defaultTempo > 0 ? module.defaultTempo : 125 );
 		plCount = plChannel = -1;
+		//module.numChannels = 1;
 		for( int idx = 0; idx < module.numChannels; idx++ )
 			channels[ idx ] = new Channel( module, idx, sampleRate * OVERSAMPLE, globalVol );
 		for( int idx = 0, end = rampLen * 2; idx < end; idx++ ) rampBuffer[ idx ] = 0;
 		filtL = filtR = 0;
 		tick();
 	}
-	public void setPatternLoop( int patNo ) {
+	public void __setPatternLoop( int patNo ) {
 		if( patNo >= module.numPatterns ) patNo = 0;
 		breakSeqPos = patNo;
 		nextRow = 0;
@@ -158,7 +141,8 @@ public class IBXM {
 		}
 		return currentPos;
 	}
-	public int seekPattern (int patNo ){
+	
+	/*public int seekPattern (int patNo ){
 		setPatternLoop(patNo);
 		int samplePos = 0;
 		int currentPos = 0;
@@ -169,7 +153,7 @@ public class IBXM {
 			tick();
 		}
 		return currentPos;
-	}
+	}*/
 	
 	/*public int seekPattern( int patNo ) {
 		setSequencePos( 0 );
@@ -204,7 +188,7 @@ public class IBXM {
 		volumeRamp( outputBuffer );
 		tick();
 		return downsample( outputBuffer, tickLen );
-	}	
+	}
 	
 	private void setTempo( int tempo ) {
 		// Make sure tick length is even to simplify 2x oversampling.
@@ -282,7 +266,7 @@ public class IBXM {
 		int noteIdx = row * module.numChannels;
 		for( int chanIdx = 0; chanIdx < module.numChannels; chanIdx++ ) {
 			Channel channel = channels[ chanIdx ];
-			pattern.getNote( noteIdx + chanIdx, note );
+			Note note = pattern.getNote( noteIdx + chanIdx );
 			if( note.effect == 0xE ) {
 				note.effect = 0x70 | ( note.param >> 4 );
 				note.param &= 0xF;
