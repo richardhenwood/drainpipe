@@ -1,6 +1,6 @@
 <!-- 
     Project Drainpipe: A RESTful sound tracker
-    Copyright (C) 2012,2013  Richard Henwood rjhenwod@yahoo.co.uk
+    Copyright (C) 2012,2013  Richard Henwood rjhenwood@yahoo.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -17,8 +17,6 @@
 -->
 <html>
     <meta charset="UTF-8">
-    <!--script type="text/javascript" src="https://raw.github.com/jussi-kalliokoski/pcmdata.js/master/js/pcmdata.js"></script-->
-    <!--script type='text/javascript' src='https://raw.github.com/oampo/audiofile.js/master/audiofile.js'></script-->
     <script language='javascript' src="https://raw.github.com/oampo/audiofile.js/master/audiofile.js"></script>
 
     <style type="text/css">
@@ -29,6 +27,10 @@
         #patterns table {
             border: 10px;
             width: 100%;
+        }
+        #patterns tr td {
+            padding: 0px;
+            border: 0px;
         }
         #rendercontrols {
             background-color: #88ff00;
@@ -262,6 +264,11 @@
                 updateMod: function(evt) {
                    if (evt.keyCode == 13) {
                        mod[evt.target.id] = document.getElementById(evt.target.id).value;
+                       if (evt.target.id == 'sequence') {
+                           console.log('making sequence an array');
+                           mod[evt.target.id] = eval('['+mod[evt.target.id]+']');
+                           //mod.sequenceLength = mod[evt.target.id].length;
+                       }
                        neuralyteTracker.putMod();
                    }
                 },
@@ -385,12 +392,13 @@
                     console.log("row: " + row + " pat: " + pat + " chan: " + chan + " dataidx: " + dataidx);
                     console.log(mod.patterns[pat].data[dataidx]);
                     mod.patterns[pat].data[dataidx] = eval("new Array("+evt.currentTarget.childNodes[0].value+");");
+                    //mod.numPatterns = Math.max(mod.numPatterns, parseInt(pat) + 1);
                     console.log("after :");
                     console.log(mod.patterns[pat].data[dataidx]);
                     neuralyteTracker.putPattern(pat, mod.patterns[pat]);
                     
+                    // this is the pretty way to render the cell elements:
                     //celldiv = document.getElementById(evt.currentTarget.id),
-
                     //if (evt.target.className == "note") {
                     //    mod.patterns[pat].data[dataidx][0] = evt.target.value.replace(".","");
                     //}
@@ -539,32 +547,53 @@
                 var patternView = document.getElementById('patternView');
                 rmChildren(patternView);
                 for (var i = 0; i < mod.patterns.length; i+=1) {
-                    var pat = mod.patterns[i];
-                    var patSpan = document.createElement('span');
-                    patSpan.id = 'pat_'+pat.patNumber;
-                    var patText = document.createTextNode('pat ' + i);
-                    var patA = document.createElement('a');
-                    patA.href = '#';
-                    patA.innerHTML = '+';
-                    patA.id = 'pat_'+pat.patNumber+'_expander';
-                    patA.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+i+')');
-                    var patB = document.createElement('a');
-                    patB.href = '#';
-                    patB.innerHTML = '>';
-                    patB.setAttribute('onclick', 'neuralyteTracker.loopPattern(event,'+i+')');
-                    patSpan.appendChild(patText);
-                    patSpan.appendChild(patA);
-                    patSpan.appendChild(patB);
-                    patSpan.appendChild(document.createTextNode('  '));
-                    patternView.appendChild(patSpan);
+                    patternView.appendChild(getPatSpan(i));
                 }
+                // render an additional pattern so a new one can be created.
+                patternView.appendChild(getPatSpan(i));
+
                 var instrumentView = document.getElementById('instrumentView');
                 rmChildren(instrumentView);
                 var i;
                 for (i = 1; i < mod.instruments.length; i += 1) {
                     instrumentView.appendChild(getInstSpan(i));
                 }
+                // render an additional, instrument so a new instrument can be added.
                 instrumentView.appendChild(getInstSpan(i));
+            }
+            function getPatSpan(i) {
+                var pat = mod.patterns[i];
+                if (typeof pat == 'undefined') {
+                    pat = newPattern(mod.numChannels, mod.patterns[0].numRows, i);
+                    mod.patterns[i] = pat;
+                }
+                var patSpan = document.createElement('span');
+                patSpan.id = 'pat_'+pat.patNumber;
+                var patText = document.createTextNode('pat ' + i);
+                var patA = document.createElement('a');
+                patA.href = '#';
+                patA.innerHTML = '+';
+                patA.id = 'pat_'+pat.patNumber+'_expander';
+                patA.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+i+')');
+                var patB = document.createElement('a');
+                patB.href = '#';
+                patB.innerHTML = '>';
+                patB.setAttribute('onclick', 'neuralyteTracker.loopPattern(event,'+i+')');
+                patSpan.appendChild(patText);
+                patSpan.appendChild(patA);
+                patSpan.appendChild(patB);
+                patSpan.appendChild(document.createTextNode('  '));
+                //console.log('rendered pattern: ' + i);
+                return patSpan;
+            }
+            function newPattern(channels, rows, patNum) {
+                var pat = new Array(channels*rows), 
+                    i = 0;
+                while (i < (channels * rows)) {
+                    pat[i] = [0,0,0,0,0];
+                    i += 1;
+                }
+                return {'numRows': rows, 'patNumber': patNum, 'data': pat};
             }
             function getInstSpan(i) {
                 var inst = mod.instruments[0];

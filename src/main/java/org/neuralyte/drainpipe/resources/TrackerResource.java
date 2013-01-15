@@ -283,7 +283,7 @@ public class TrackerResource {
     public String patterns(@PathParam("songname") String songName) {
 
     	//Tracker tracker = Tracker.getInstance();
-    	Pattern[] pats = tracker.getPlayer().getModule().getPatterns();
+    	ArrayList<Pattern> pats = tracker.getPlayer().getModule().getPatterns();
     	Gson gson = new Gson();
     	String json = gson.toJson(pats);
     	
@@ -367,7 +367,7 @@ public class TrackerResource {
        	Tracker tracker = Tracker.getInstance();
     	
     	Gson gson = new Gson();
-    	Pattern[] pats = gson.fromJson(incomingJson, Pattern[].class);
+    	ArrayList<Pattern> pats = gson.fromJson(incomingJson, ArrayList.class);
     	tracker.getPlayer().getModule().setPatterns(pats);
     	
     	return "{\"sequence\": \"done\"}";

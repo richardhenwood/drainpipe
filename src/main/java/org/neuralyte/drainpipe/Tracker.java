@@ -1,6 +1,6 @@
 /*
     Project Drainpipe: A RESTful sound tracker
-    Copyright (C) 2012  Richard Henwood rjhenwod@yahoo.co.uk
+    Copyright (C) 2012,2013  Richard Henwood rjhenwod@yahoo.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -17,66 +17,35 @@
  */
 package org.neuralyte.drainpipe;
 
-//import ibxm.IBXM;
-import ibxm.Instrument;
 import ibxm.Module;
 import ibxm.Player;
-
-//import java.io.File;
-//import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Enumeration;
-import java.util.Vector;
 import java.util.zip.*;
 
-import javax.sound.sampled.LineUnavailableException;
-
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
-import com.google.gson.stream.JsonReader;
-
-//import javax.sound.sampled.LineUnavailableException;
 
 public class Tracker implements Runnable {
 
 	final int SAMPLE_RATE = 44100;
-//	public static ibxm.Player player;
 	private URL songFile = null;
 	private int interpolation, duration, samplePos;
-    //private IBXM ibxm;
 	private Player player;
 	private boolean isPlaying = false;
-	
-   // private JList instrumentList;
-
-	//private String outfile = null;
-
 
 	// Private constructor prevents instantiation from other classes
-	private Tracker() {
-		//System.out.println("this shouldn't be caled.");
-		/*try {
-			player = new ibxm.Player();
-		} catch (LineUnavailableException e) {
-			e.printStackTrace();
-		}*/
-	}
+	private Tracker() {	}
 
 	/**
 	 * SingletonHolder is loaded on the first execution of Singleton.getInstance() 
@@ -223,30 +192,14 @@ public class Tracker implements Runnable {
 	
     public synchronized void stop() {
     	player.stop();
-  /*      playing = false;
-        try {
-                if( playThread != null ) playThread.join();
-        } catch( InterruptedException e ) {
-        }*/
- /*       updateTimer.stop();
-        playButton.setText( "Play" );*/
 }
 
 private synchronized void seek( int pos ) {
         samplePos = player.seek( pos );
 }
 
-/*
-private synchronized void setInterpolation( int interpolation ) {
-        this.interpolation = interpolation;
-        if( player != null ) player.setInterpolation( interpolation );
-}*/
-
 	public void restart() {
 		this.seek(0);
-		//player.restart();
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void run() {

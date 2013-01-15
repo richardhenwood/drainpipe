@@ -7,27 +7,30 @@ import java.util.ArrayList;
 public class Module {
 	public String songName = "Blank";
 	public final String moduleVerion = "1";
-	public int numChannels = 4, numInstruments = 1;
-	public int numPatterns = 1, sequenceLength = 1, restartPos = 0;
+	public int numChannels = 4;
+	//private int numInstruments = 1;
+	//public int numPatterns = 1;
+	//public int sequenceLength = 1;
+	public int restartPos = 0;
 	public int defaultGVol = 64, defaultSpeed = 6, defaultTempo = 125, c2Rate = Sample.C2_PAL, gain = 64;
 	public boolean linearPeriods = false, fastVolSlides = false;
 	public int[] defaultPanning = { 51, 204, 204, 51 };
 	private int[] sequence = { 0 };
-	private Pattern[] patterns = { new Pattern( 4, 64, 0 ) };
+	private ArrayList<Pattern> patterns = new ArrayList<Pattern>(); //{ new Pattern( 4, 64, 0 ) };
 	private ArrayList<Instrument> instruments = new ArrayList<Instrument>();//{ new Instrument(), new Instrument() };
-	private IBXM listener;
+	//private IBXM listener;
 
 	private static final int[] keyToPeriod = {
 			29020, 27392, 25855, 24403, 23034, 21741, 20521,
 			19369, 18282, 17256, 16287, 15373, 14510, 13696
 	};
 
-	public Module() {}
+	public Module() {
+		patterns.add(new Pattern(4, 64, 0));
+		instruments.add(new Instrument());
+	}
 	
 	public Module( byte[] moduleData ) {
-		// init a couple of instruments for convienience.
-		//instruments.add(new Instrument());
-		//instruments.add(new Instrument());
 		if( isoLatin1( moduleData, 0, 17 ).equals( "Extended Module: " ) ) {
 			loadXM( moduleData );
 		} else if( isoLatin1( moduleData, 44, 4 ).equals( "SCRM" ) ) {
@@ -41,16 +44,17 @@ public class Module {
 		return this.sequence;
 	}
 	
-	public Pattern[] getPatterns () {
+	public ArrayList<Pattern> getPatterns () {
 		return this.patterns;
 	}
 	public Pattern getPattern (int patNo) {
-		return this.patterns[patNo];
+		return this.patterns.get(patNo);
 	}
 
 	private void loadMOD( byte[] moduleData ) {
+		int numPatterns = 1;
 		songName = isoLatin1( moduleData, 0, 20 );
-		sequenceLength = moduleData[ 950 ] & 0x7F;
+		int sequenceLength = moduleData[ 950 ] & 0x7F;
 		restartPos = moduleData[ 951 ] & 0x7F;
 		if( restartPos >= sequenceLength ) restartPos = 0;
 		sequence = new int[ 128 ];
@@ -91,9 +95,10 @@ public class Module {
 				defaultPanning[ idx ] = 204;
 		}
 		int moduleDataIdx = 1084;
-		patterns = new Pattern[ numPatterns ];
+		patterns = new ArrayList<Pattern>();
 		for( int patIdx = 0; patIdx < numPatterns; patIdx++ ) {
-			Pattern pattern = patterns[ patIdx ] = new Pattern( numChannels, 64, patIdx );
+			patterns.add(new Pattern(numChannels, 64, patIdx));
+			Pattern pattern = patterns.get(patIdx);// = new Pattern( numChannels, 64, patIdx );
 			for( int patDataIdx = 0; patDataIdx < pattern.data.length; patDataIdx += 1 ) {
 				int period = ( moduleData[ moduleDataIdx ] & 0xF ) << 8;
 				period = ( period | ( moduleData[ moduleDataIdx + 1 ] & 0xFF ) ) * 4;
@@ -127,7 +132,7 @@ public class Module {
 				moduleDataIdx += 4;
 			}
 		}
-		numInstruments = 31;
+		int numInstruments = 31;
 		// init the first instrument empty.
 		instruments.add(new Instrument());
 		for( int instIdx = 1; instIdx <= numInstruments; instIdx++ ) {
@@ -161,9 +166,9 @@ public class Module {
 
 	private void loadS3M( byte[] moduleData ) {
 		songName = codePage850( moduleData, 0, 28 );
-		sequenceLength = ushortle( moduleData, 32 );
-		numInstruments = ushortle( moduleData, 34 );
-		numPatterns = ushortle( moduleData, 36 );
+		int sequenceLength = ushortle( moduleData, 32 );
+		int numInstruments = ushortle( moduleData, 34 );
+		int numPatterns = ushortle( moduleData, 36 );
 		int flags = ushortle( moduleData, 38 );
 		int version = ushortle( moduleData, 40 );
 		fastVolSlides = ( ( flags & 0x40 ) == 0x40 ) || version == 0x1300;
@@ -187,15 +192,12 @@ public class Module {
 		for( int seqIdx = 0; seqIdx < sequenceLength; seqIdx++ )
 			sequence[ seqIdx ] = moduleData[ 96 + seqIdx ] & 0xFF;
 		int moduleDataIdx = 96 + sequenceLength;
-		//instruments = new Instrument[ numInstruments + 1 ];
-		//instruments[ 0 ] = new Instrument();
 
 		// init the first instrument empty.
 		instruments.add(new Instrument());
 		for( int instIdx = 1; instIdx <= numInstruments; instIdx++ ) {
 			instruments.add(new Instrument());
 			Instrument instrument = instruments.get(instIdx);
-			//Instrument instrument = instruments[ instIdx ] = new Instrument();
 			Sample sample = instrument.samples[ 0 ];
 			int instOffset = ushortle( moduleData, moduleDataIdx ) << 4;
 			moduleDataIdx += 2;
@@ -246,9 +248,10 @@ public class Module {
 			}
 			sample.setSampleData( sampleData, loopStart, loopLength, false );
 		}
-		patterns = new Pattern[ numPatterns ];
+		patterns = new ArrayList<Pattern>();
 		for( int patIdx = 0; patIdx < numPatterns; patIdx++ ) {
-			Pattern pattern = patterns[ patIdx ] = new Pattern( numChannels, 64, patIdx );
+			patterns.add(new Pattern( numChannels, 64, patIdx ));
+			Pattern pattern = patterns.get(patIdx);
 			int inOffset = ( ushortle( moduleData, moduleDataIdx ) << 4 ) + 2;
 			int rowIdx = 0;
 			while( rowIdx < 64 ) {
@@ -314,11 +317,11 @@ public class Module {
 		songName = codePage850( moduleData, 17, 20 );
 		boolean deltaEnv = isoLatin1( moduleData, 38, 20 ).startsWith( "DigiBooster Pro" );
 		int dataOffset = 60 + intle( moduleData, 60 );
-		sequenceLength = ushortle( moduleData, 64 );
+		int sequenceLength = ushortle( moduleData, 64 );
 		restartPos = ushortle( moduleData, 66 );
 		numChannels = ushortle( moduleData, 68 );
-		numPatterns = ushortle( moduleData, 70 );
-		numInstruments = ushortle( moduleData, 72 );
+		int numPatterns = ushortle( moduleData, 70 );
+		int numInstruments = ushortle( moduleData, 72 );
 		linearPeriods = ( ushortle( moduleData, 74 ) & 0x1 ) > 0;
 		defaultGVol = 64;
 		defaultSpeed = ushortle( moduleData, 76 );
@@ -332,13 +335,14 @@ public class Module {
 			int entry = moduleData[ 80 + seqIdx ] & 0xFF;
 			sequence[ seqIdx ] = entry < numPatterns ? entry : 0;
 		}
-		patterns = new Pattern[ numPatterns ];
+		patterns = new ArrayList<Pattern>();
 		for( int patIdx = 0; patIdx < numPatterns; patIdx++ ) {
 			if( moduleData[ dataOffset + 4 ] != 0 )
 				throw new IllegalArgumentException( "Unknown pattern packing type!" );
 			int numRows = ushortle( moduleData, dataOffset + 5 );
 			int numNotes = numRows * numChannels;
-			Pattern pattern = patterns[ patIdx ] = new Pattern( numChannels, numRows, patIdx );
+			patterns.add( new Pattern( numChannels, numRows, patIdx ));
+			Pattern pattern = patterns.get(patIdx);
 			int patternDataLength = ushortle( moduleData, dataOffset + 7 );
 			dataOffset += intle( moduleData, dataOffset );
 			int nextOffset = dataOffset + patternDataLength;
@@ -510,9 +514,9 @@ public class Module {
 	public void toStringBuffer( StringBuffer out ) {
 		out.append( "Song Name: " + songName + '\n'
 			+ "Num Channels: " + numChannels + '\n'
-			+ "Num Instruments: " + numInstruments + '\n'
-			+ "Num Patterns: " + numPatterns + '\n'
-			+ "Sequence Length: " + sequenceLength + '\n'
+			+ "Num Instruments: " + this.instruments.size() + '\n'
+			+ "Num Patterns: " + this.patterns.size() + '\n'
+			+ "Sequence Length: " + this.sequence.length + '\n'
 			+ "Restart Pos: " + restartPos + '\n'
 			+ "Default Speed: " + defaultSpeed + '\n'
 			+ "Default Tempo: " + defaultTempo + '\n'
@@ -521,9 +525,9 @@ public class Module {
 		for( int seqIdx = 0; seqIdx < sequence.length; seqIdx++ )
 			out.append( sequence[ seqIdx ] + ", " );
 		out.append( '\n' );
-		for( int patIdx = 0; patIdx < patterns.length; patIdx++ ) {
+		for( int patIdx = 0; patIdx < patterns.size(); patIdx++ ) {
 			out.append( "Pattern " + patIdx + ":\n" );
-			patterns[ patIdx ].toStringBuffer( out );
+			patterns.get(patIdx).toStringBuffer( out );
 		}
 		for( int insIdx = 1; insIdx < instruments.size(); insIdx++ ) {
 			out.append( "Instrument " + insIdx + ":\n" );
@@ -533,7 +537,7 @@ public class Module {
 
 	public void setSequence(int[] a) {
 		this.sequence = a;
-		this.sequenceLength = a.length;
+		//this. = a.length;
 		/*int[] c = new int[a.length];
 		for(int i = 0; i < a.length; i++)
 		{
@@ -544,7 +548,7 @@ public class Module {
 		this.sequence = c;*/
 	}
 
-	public void setPatterns(Pattern[] array) {
+	public void setPatterns(ArrayList<Pattern> array) {
 		this.patterns = array;
 	}
 	
@@ -555,12 +559,12 @@ public class Module {
 		while (this.instruments.size() <= i) {
 			instruments.add(new Instrument());
 		}
-		this.numInstruments = this.instruments.size();
+		//this.numInstruments = this.instruments.size();
 		return this.instruments.get(i);
 	}
 
 	public void setPattern(Pattern pat) {
-		this.patterns[pat.patNumber] = pat;
+		this.patterns.add(pat.patNumber, pat);
 	}
 	
 	public void setInstrument(Instrument inst, int index) {
@@ -577,6 +581,5 @@ public class Module {
 
 	public void setSample(int instNo, int sampNo, Sample sampDat) {
 		this.getInstrument(instNo).samples[sampNo] = sampDat;
-	}
-	
+	}	
 }

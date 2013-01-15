@@ -1,3 +1,6 @@
+// Copyright mutart ???
+// Modifications copyright 2012,2013, Richard Henwood Lisenced under AGPL3
+
 
 package ibxm;
 
@@ -39,35 +42,13 @@ public class Player {
 		}
 	}
 	
-	/*private Player() {
-		this(44100);		
-	}*/
-	
 	public void loadModule(Module mod) {
 		Player.ibxm = new IBXM(mod, this.SAMPLERATE);
 	}
-
-	/**
-		Set the Module instance to be played.
-	*/
-	/*public void _old_set_module( Module m ) {
-		if( m != null ) module = m;
-		stop();
-		//ibxm.set_module( module );
-		//song_duration = ibxm.calculate_song_duration();
-	}*/
 	
 	public Module getModule () {
 		return Player.ibxm.getModule();
 	}
-	
-	/**
-		If loop is true, playback will continue indefinitely,
-		otherwise the module will play through once and stop.
-	*/
-	/*public void setLoop( boolean loop ) {
-		this.loop = loop;
-	}*/
 	
 	public int seek (int i) {
 		return Player.ibxm.seek(i);
@@ -88,9 +69,6 @@ public class Player {
 		Player.ibxm.setLoopPattern(true);
 		Player.ibxm.setLoopPatternNo(patNo);
 		this.restart();
-		//stop();
-		//play_thread = new Thread( new AudioDriver(SAMPLERATE) );
-		//play_thread.start();
 	}
 	
 	/**
@@ -151,11 +129,9 @@ public class Player {
 	
 	private class AudioDriver implements Runnable {
 		private int sampleRate;
-		private int bitsPerSecond;
 		
 		public AudioDriver(int sampleRate) {
 			this.sampleRate = sampleRate;
-			this.bitsPerSecond = sampleRate * 2 * 16;
 		}
 
 		public void run() {

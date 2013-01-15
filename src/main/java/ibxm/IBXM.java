@@ -59,7 +59,7 @@ public class IBXM {
 	
 	/* Set the pattern in the sequence to play. The tempo is reset to the default. */
 	public void setSequencePos( int pos ) {
-		if( pos >= module.sequenceLength ) pos = 0;
+		if( pos >= module.getSequence().length ) pos = 0;
 		breakSeqPos = pos;
 		nextRow = 0;
 		tick = 1;
@@ -75,7 +75,7 @@ public class IBXM {
 		tick();
 	}
 	public void __setPatternLoop( int patNo ) {
-		if( patNo >= module.numPatterns ) patNo = 0;
+		if( patNo >= module.getPatterns().size() ) patNo = 0;
 		breakSeqPos = patNo;
 		nextRow = 0;
 		tick = 1;
@@ -241,17 +241,17 @@ public class IBXM {
 	private boolean row() {
 		boolean songEnd = false;
 		if( breakSeqPos >= 0 ) {
-			if( breakSeqPos >= module.sequenceLength ) breakSeqPos = nextRow = 0;
-			while( module.getSequence()[ breakSeqPos ] >= module.numPatterns ) {
+			if( breakSeqPos >= module.getSequence().length ) breakSeqPos = nextRow = 0;
+			while( module.getSequence()[ breakSeqPos ] >= module.getPatterns().size() ) {
 				breakSeqPos++;
-				if( breakSeqPos >= module.sequenceLength ) breakSeqPos = nextRow = 0;
+				if( breakSeqPos >= module.getSequence().length ) breakSeqPos = nextRow = 0;
 			}
 			if( breakSeqPos <= seqPos ) songEnd = true;
 			seqPos = breakSeqPos;
 			for( int idx = 0; idx < module.numChannels; idx++ ) channels[ idx ].plRow = 0;
 			breakSeqPos = -1;
 		}
-		Pattern pattern = module.getPatterns()[ module.getSequence()[ seqPos ] ];
+		Pattern pattern = module.getPatterns().get( module.getSequence()[ seqPos ] );
 		if (this.loopPattern) {
 			pattern = module.getPattern(this.loopPatternNo);
 		}

@@ -539,7 +539,7 @@ public class Channel {
 	}
 	
 	private void trigger() {
-		if( noteIns > 0 && noteIns <= module.numInstruments ) {
+		if( noteIns > 0 && noteIns <= module.getInstruments().size() ) {
 			instrument = module.getInstrument(noteIns);
 			Sample sam = instrument.samples[ instrument.keyToSample[ noteKey < 97 ? noteKey : 0 ] ];
 			volume = sam.volume >= 64 ? 64 : sam.volume & 0x3F;
