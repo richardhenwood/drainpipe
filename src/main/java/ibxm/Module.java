@@ -555,6 +555,7 @@ public class Module {
 		while (this.instruments.size() <= i) {
 			instruments.add(new Instrument());
 		}
+		this.numInstruments = this.instruments.size();
 		return this.instruments.get(i);
 	}
 
