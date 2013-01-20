@@ -20,7 +20,9 @@ public class IBXM {
 	private int[] rampBuffer;
 	private Channel[] channels;
 	private int interpolation, filtL, filtR;
-	private int sampleRate, tickLen, rampLen, rampRate;
+	private int sampleRate;
+	private int tickLen;
+	private int rampLen, rampRate;
 	private int seqPos, breakSeqPos, row, nextRow, tick;
 	private int speed, plCount, plChannel;
 	private GlobalVol globalVol;

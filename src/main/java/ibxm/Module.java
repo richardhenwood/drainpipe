@@ -8,16 +8,15 @@ public class Module {
 	public String songName = "Blank";
 	public final String moduleVerion = "1";
 	public int numChannels = 4;
-	//private int numInstruments = 1;
-	//public int numPatterns = 1;
-	//public int sequenceLength = 1;
 	public int restartPos = 0;
-	public int defaultGVol = 64, defaultSpeed = 6, defaultTempo = 125, c2Rate = Sample.C2_PAL, gain = 64;
+	public int defaultGVol = 64, defaultSpeed = 6;
+	public int defaultTempo = 125;
+	public int c2Rate = Sample.C2_PAL, gain = 64;
 	public boolean linearPeriods = false, fastVolSlides = false;
 	public int[] defaultPanning = { 51, 204, 204, 51 };
 	private int[] sequence = { 0 };
-	private ArrayList<Pattern> patterns = new ArrayList<Pattern>(); //{ new Pattern( 4, 64, 0 ) };
-	private ArrayList<Instrument> instruments = new ArrayList<Instrument>();//{ new Instrument(), new Instrument() };
+	private ArrayList<Pattern> patterns = new ArrayList<Pattern>();
+	private ArrayList<Instrument> instruments = new ArrayList<Instrument>();
 	//private IBXM listener;
 
 	private static final int[] keyToPeriod = {

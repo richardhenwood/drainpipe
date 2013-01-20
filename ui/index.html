@@ -344,9 +344,12 @@
                     // in the 'private' method 'updateUI'.
                     // This design is terriable and should be
                     // fixed.
+                    if (typeof pat == 'undefined') {
+                        pat = newPattern(mod.numChannels, mod.patterns[0].numRows, patNo);
+                        mod.patterns[patNo] = pat;
+                    }
                     var patSpan = document.getElementById('pat_' + patNo);
                     console.log("rendering pattern: " + patNo);
-                    //console.log(pat);
                     var patTable = document.createElement('table');
                     patTable.id = "pat_"+patNo+"_table";
                     for (var row = 0; row < pat.numRows; row += 1) {
@@ -547,29 +550,27 @@
                 var patternView = document.getElementById('patternView');
                 rmChildren(patternView);
                 for (var i = 0; i < mod.patterns.length; i+=1) {
-                    patternView.appendChild(getPatSpan(i));
+                    patternView.appendChild(getPatSpan(mod.patterns[i], "pat "+i));
                 }
                 // render an additional pattern so a new one can be created.
-                patternView.appendChild(getPatSpan(i));
+                var newPat = newPattern(mod.numChannels, mod.patterns[0].numRows, i);
+                patternView.appendChild(getPatSpan(newPat, "new pattern ("+i+")"));
 
                 var instrumentView = document.getElementById('instrumentView');
                 rmChildren(instrumentView);
                 var i;
                 for (i = 1; i < mod.instruments.length; i += 1) {
-                    instrumentView.appendChild(getInstSpan(i));
+                    var inst = mod.instruments[i];
+                    instrumentView.appendChild(getInstSpan(inst, i, rightjustify(i,2)+" "+inst.name));
                 }
                 // render an additional, instrument so a new instrument can be added.
-                instrumentView.appendChild(getInstSpan(i));
+                instrumentView.appendChild(getInstSpan(mod.instruments[0], i, "new instrument"));
             }
-            function getPatSpan(i) {
-                var pat = mod.patterns[i];
-                if (typeof pat == 'undefined') {
-                    pat = newPattern(mod.numChannels, mod.patterns[0].numRows, i);
-                    mod.patterns[i] = pat;
-                }
+            function getPatSpan(pat, patName) {
+                var i = pat.patNumber;
                 var patSpan = document.createElement('span');
-                patSpan.id = 'pat_'+pat.patNumber;
-                var patText = document.createTextNode('pat ' + i);
+                patSpan.id = 'pat_'+i;
+                var patText = document.createTextNode(patName);
                 var patA = document.createElement('a');
                 patA.href = '#';
                 patA.innerHTML = '+';
@@ -595,16 +596,14 @@
                 }
                 return {'numRows': rows, 'patNumber': patNum, 'data': pat};
             }
-            function getInstSpan(i) {
-                var inst = mod.instruments[0];
+            function getInstSpan(inst, instNo, instName) {
                 var instSpan = document.createElement('div');
-                instSpan.id = "inst_"+i;
+                instSpan.id = "inst_"+instNo;
                 instSpan.class = 'instClass';
                 var instA = document.createElement('a');
                 instA.href = "#";
-                instA.innerHTML = rightjustify(i,2)+" "+inst.name;
-                instA.onclick = new Function("neuralyteTracker.renderInstrument("+i+")");
-                //instA.setAttribute('onclick', 'neuralyteTracker.renderInstrument(event,'+i+')');
+                instA.innerHTML = instName;
+                instA.onclick = new Function("neuralyteTracker.renderInstrument("+instNo+")");
                 instSpan.appendChild(instA);
                 return instSpan;
             }
@@ -767,8 +766,8 @@
             <tr><td>global_volume</td><td>X</td><td>X</td><td></td><td></td><td>This is a setup value for the mod. If you alter this value, you need to restart the tune to hear the effect.</td></tr>
             <tr><td>sequence</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
             <tr><td>patterns</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
-            <tr><td>instruments</td><td>X</td><td>TODO</td><td></td><td></td><td></td></tr>
-            <tr><td>samples</td><td>X</td><td>TODO</td><td></td><td></td><td>Samples included in instruments.</td></tr>
+            <tr><td>instruments</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
+            <tr><td>samples</td><td>X</td><td>X</td><td></td><td></td><td>Samples included in instruments.</td></tr>
 
         </table>
 
