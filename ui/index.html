@@ -338,12 +338,24 @@
                     var relNote = document.createElement('input');
                     relNote.value = samp.relNote;
                     relNote.size = 5;
-                    relNote.onchange = (function(x) {samp.relNote = parseInt(x.target.value);});
+                    relNote.onchange = (function(x) {
+                            // this updates the server with the new values.
+                            samp.relNote = parseInt(x.target.value);
+                            var n = x.target.parentElement.id.split('_'); 
+                            console.log(mod);
+                            neuralyteTracker.putSample(n[1], n[2], mod.instruments[n[1]].samples[n[2]]);
+                    });
                     var c2RateText = document.createTextNode("c2Rate");
                     var c2Rate = document.createElement('input');
                     c2Rate.value = samp.c2Rate;
                     c2Rate.size = 5;
-                    c2Rate.onchange = (function(x) {samp.c2Rate = parseInt(x.target.value);});
+                    c2Rate.onchange = (function(x) {
+                            // this updates the server with the new values.
+                            samp.c2Rate = parseInt(x.target.value);
+                            var n = x.target.parentElement.id.split('_'); 
+                            console.log(mod);
+                            neuralyteTracker.putSample(n[1], n[2], mod.instruments[n[1]].samples[n[2]]);
+                    });
 
                     sampSpan.appendChild(sampUpload);
                     sampSpan.appendChild(relNoteText);
@@ -475,20 +487,20 @@
                         modInst[i] = Math.round(decoded.channels[0][i]*scale);
                     }
                     console.log(file);
-                    setSample(modInst, evt.target.id, file.name);
+                    setNewSample(modInst, evt.target.id, file.name, 8363, 0);
                 }
                 reader.readAsBinaryString(oFile);
             }
 
-            function setSample(dat, idstr, name) {
+            function setNewSample(dat, idstr, name, c2Rate, relNote) {
                 var n = idstr.split('_');
                 var sampJson = {'name': name,
-                    'c2Rate': 8363,
+                    'c2Rate': c2Rate,
                     'fineTune': 0,
                     'loopLength': 0,
                     'loopStart': dat.length - 1,
                     'panning': 128,
-                    'relNote': 0,
+                    'relNote': relNote,
                     'sampleData': dat,
                     'volume': 64};
                 mod.instruments[n[1]].samples[n[2]] = sampJson;
