@@ -811,6 +811,41 @@
 
 		...
 
+        The effects are based on XM supported effects. The integer equivilents are:
+<pre>
+
+nt, int eqivelent      XM effect
+  0                    0xy: Arpeggio                          
+  1                    1xy: Portamento Up                     
+  2                    2xy: Portamento Down                   
+  3                    3xy: Tone-Portamento                   
+  4                    4xy: Vibrato                           
+  5                    5xy: Tone-Portamento + Volume Slide    
+  6                    6xy: Vibrato + Volume Slide            
+  7                    7xy: Tremolo                           
+  8                    8xy: Set Panning                       
+  9                    9xy: Set Sample Offset                 
+ 10                    Axy: Volume Slide                      
+  ?                    Bxy: Position Jump                     
+ 12                    Cxy: Set Volume                        
+  ?                    Dxy: Pattern Break                     
+  ?                    Exy: Extended MOD Commands             
+  ?                    Fxy: Set Speed/Tempo                   
+ 16                    Gxy: Set Global Volume
+ 17                    Hxy: Global Volume Slide
+ 20                    Kxy: Key Off
+ 21                    Lxy: Set Envelope Position
+ 25                    Pxy: Panning Slide
+ 27                    Rxy: Retrig
+ 29                    Txy: Tremor
+  ?                    Xxy: Extended XM effects
+  ?                    Zxy: Macros
+
+? means either I haven't figured it out, or it isn't supported or both.
+</pre>
+
+
     </span>
+
     </body>
 </html>
