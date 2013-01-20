@@ -342,7 +342,7 @@
                             // this updates the server with the new values.
                             samp.relNote = parseInt(x.target.value);
                             var n = x.target.parentElement.id.split('_'); 
-                            console.log(mod);
+                            console.log(samp);
                             neuralyteTracker.putSample(n[1], n[2], mod.instruments[n[1]].samples[n[2]]);
                     });
                     var c2RateText = document.createTextNode("c2Rate");
@@ -378,6 +378,17 @@
                     }
                     var patSpan = document.getElementById('pat_' + patNo);
                     console.log("rendering pattern: " + patNo);
+                    var numRowstext = document.createTextNode("number of rows");
+                    var numRows = document.createElement('input');
+                    numRows.value = pat.numRows;
+                    numRows.size = 5;
+                    numRows.onchange = (function(x) {
+                            // this updates the server with the new values.
+                            pat.numRows = parseInt(x.target.value);
+                            var n = x.target.parentElement.id.split('_'); 
+                            console.log(mod);
+                            neuralyteTracker.putPattern(patNumber, pat);
+                    });
                     var patTable = document.createElement('table');
                     patTable.id = "pat_"+patNo+"_table";
                     for (var row = 0; row < pat.numRows; row += 1) {
@@ -394,6 +405,8 @@
                         }
                         patTable.appendChild(tr);
                     }
+                    patSpan.appendChild(numRowstext);
+                    patSpan.appendChild(numRows);
                     patSpan.appendChild(patTable);
                     var patExpander = document.getElementById('pat_' + patNo+'_expander');
                     patExpander.innerHTML = '-';
@@ -598,6 +611,7 @@
                 var i = pat.patNumber;
                 var patSpan = document.createElement('span');
                 patSpan.id = 'pat_'+i;
+
                 var patText = document.createTextNode(patName);
                 var patA = document.createElement('a');
                 patA.href = '#';

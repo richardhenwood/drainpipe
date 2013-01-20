@@ -178,6 +178,7 @@ public class TrackerResource {
     @GET @Path("{songname}/play")
     @Produces("text/plain")
     public String playJsong(@PathParam("songname") String songName) throws IOException {
+    	tracker = Tracker.getInstance();
     	if (tracker == null) {
     		this.getJsongRoot(songName);
     	}
