@@ -322,7 +322,7 @@
                         }
 
                     }
-                    sampCanvas = document.createElement('canvas');
+                    var sampCanvas = document.createElement('canvas');
                     sampCanvas.setAttribute('height', 100);
                     sampCanvas.setAttribute('width', 300);
                     sampCanvas.id = 'samp_' + instNo + '_'+sampNo + '_canvas';
@@ -333,7 +333,23 @@
                     sampUpload.id = 'samp_'+instNo+'_'+sampNo+'_upload';
                     sampUpload.type = 'file';
                     sampUpload.onchange = loadWavFile;
+
+                    var relNoteText = document.createTextNode("relNote");
+                    var relNote = document.createElement('input');
+                    relNote.value = samp.relNote;
+                    relNote.size = 5;
+                    relNote.onchange = (function(x) {samp.relNote = parseInt(x.target.value);});
+                    var c2RateText = document.createTextNode("c2Rate");
+                    var c2Rate = document.createElement('input');
+                    c2Rate.value = samp.c2Rate;
+                    c2Rate.size = 5;
+                    c2Rate.onchange = (function(x) {samp.c2Rate = parseInt(x.target.value);});
+
                     sampSpan.appendChild(sampUpload);
+                    sampSpan.appendChild(relNoteText);
+                    sampSpan.appendChild(relNote);
+                    sampSpan.appendChild(c2RateText);
+                    sampSpan.appendChild(c2Rate);
 
                     console.log('sample data is ready for drawing.');
                 },
@@ -624,7 +640,7 @@
                 rowidx = (rowNum * numChannels) + chanNum;
                 row = pattern.data[rowidx];
 
-                rowinput = document.createElement('input');
+                var rowinput = document.createElement('input');
                 rowinput.value = row;
                 //rowinput.onchange = new Function(console.log(rowinput));
                 td.appendChild(rowinput)
