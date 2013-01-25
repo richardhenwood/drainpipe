@@ -20,6 +20,16 @@
     <script language='javascript' src="https://raw.github.com/oampo/audiofile.js/master/audiofile.js"></script>
 
     <style type="text/css">
+        div {
+            padding: 2px;
+            margin: 10px;
+        }
+        #debug {
+            background-color: yellow;
+        }
+        #title {
+            height: 20px;
+        }
         #working {
             display: inline-block;
             width: 140px;
@@ -84,6 +94,15 @@
         #modMetadata {
             width: 250px;
             float: left;
+            background-color: #ff88ff;
+        }
+        .spanlabel {
+            #border: 1px solid gray;
+            display: inline-block;
+            left: 10px;
+            position: relative;
+            top: -20px;
+            background-color: inherit;
         }
         .note {
             color: purple;
@@ -668,6 +687,7 @@
 
                 var rowinput = document.createElement('input');
                 rowinput.value = row;
+                rowinput.size = 10;
                 //rowinput.onchange = new Function(console.log(rowinput));
                 td.appendChild(rowinput)
                 return td;
@@ -749,36 +769,36 @@
     <body onLoad="init();"> 
         <div id='title'>NeuralyteTracker v0.1.0 <span id='working'></span>mod target: <span id='targetpath'></span></div>
         <span id='trackerUI'>
-        <div id='modBrowser'>
+        <div id='modBrowser'><span class='spanlabel'>file</span>
             load {xm,s3m,mod,jsong} from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
-                <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a> or 
-                    <a href='#' class='but' onClick='neuralyteTracker.new();'>new</a> <br/>
+            <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a> or 
+            <a href='#' class='but' onClick='neuralyteTracker.new();'>new</a> <br/>
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a>
-            <span id='debug'>
-                <a href='#' id='putMod' type='text' class='but' onClick='neuralyteTracker.putMod("");'>pushJsong</a>
-                <a href='#' type='text' class='but' onClick='neuralyteTracker.saveJsong("");'>saveJsong</a>
-                <a href='#' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a>
-                <a href='#' type='text' class='but' onClick='neuralyteTracker.getStatus("");'>get status</a>
-            </span>
         </div>
-        <span id='rendercontrols'>
+        <div id='debug'><span class='spanlabel'>debug</span>
+            <a href='#' id='putMod' type='text' class='but' onClick='neuralyteTracker.putMod("");'>pushJsong</a>
+            <a href='#' type='text' class='but' onClick='neuralyteTracker.saveJsong("");'>saveJsong</a>
+            <a href='#' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a>
+            <a href='#' type='text' class='but' onClick='neuralyteTracker.getStatus("");'>get status</a>
+        </div>
+        <div id='rendercontrols'><span class='spanlabel'>controls</span>
             <a href='#' class='but' id='playbutton' onClick='neuralyteTracker.play();'>play</a><br/>
             <a href='#' class='but' id='stopbutton' onClick='neuralyteTracker.pause();'>pause</a><br/>
             <a href='#' class='but' id='stopbutton' onClick='neuralyteTracker.restart();'>restart</a><br/>
-            </span>
-            <div id='modMetadata'> mod name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateMod(event)"/></br>
+        </div>
+        <div id='modMetadata'><span class='spanlabel'>globals</span>
+            mod name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateMod(event)"/></br>
             gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/></br>
             defaultSpeed: <input id='defaultSpeed' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/></br>
             defaultTempo: <input id='defaultTempo' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
             sequence: <input id='sequence' type='text' size='15' onkeypress="neuralyteTracker.updateMod(event)"/>
-
         </div>
-        <div id='instruments'>
-            <div id='instrumentView'></div><div id='sampleView'></div>
+        <div id='instruments'><span class='spanlabel'>instruments</span>
+            <div id='instrumentView'></div>
+            <div id='sampleView'></div>
         </div>
-        <div id='patternView'></div>
-
-
+        <div id='patternView'><span class='spanlabel'>paterns</span>
+        </div>
 
         <br/>
         <br/>
