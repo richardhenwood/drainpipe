@@ -36,6 +36,12 @@
             display: inline-block;
             width: 140px;
         }
+        #patterns {
+            width: 100%;
+            float: left;
+            background-color: #ddddff;
+            display: block;
+        }
         #patterns table {
             border: 10px;
             width: 100%;
@@ -54,18 +60,6 @@
             float: left;
             background-color: #00ff00;
         }
-        #patternView {
-            width: 100%;
-            float: left;
-            background-color: #ddddff;
-            display: block;
-        }
-        #instruments {
-            width: 600px;
-            float: left;
-            background-color: #ffdddd;
-            height: 200px;
-        }
         #documentation {
             width: 100%;
             display: block;
@@ -77,16 +71,31 @@
             display: block;
             float: left;
         }       
-
+        #instruments {
+            width: 700px;
+            float: left;
+            display: block;
+            background-color: #ffdddd;
+            height: 200px;
+        }
         #instrumentView {
+            margin-top: -10px;
             width: 200px;
             float: left;
             overflow: auto;
             height: 200px;
         }
-        #sampleView {
-            width: 400px;
+        #patternView {
+            width: 100%;
             float: left;
+            display: block;
+            overflow: auto;
+            #height: 200px;
+        }
+        #sampleView {
+            margin-top: -20px;
+            width: 400px;
+            float: right;
             overflow: auto;
             height: 200px;
             background-color: #ffcccc;
@@ -384,6 +393,19 @@
 
                     console.log('sample data is ready for drawing.');
                 },
+                addNewPattern: function(evt) {
+                    var numRows = parseInt(prompt("number of rows", 64));
+                    var pat = new newPattern(mod.numChannels, numRows, mod.patterns.length);
+                    mod.patterns[mod.patterns.length] = pat;
+                    updateUI(mod);
+                },
+                addNewInstrument: function(evt) {
+                    var inst = mod.instruments[0];
+                    inst.name = prompt("instrument name", "");
+                    inst.samples = Array(newSample(null, 'new sample'));
+                    mod.instruments[mod.instruments.length] = inst;
+                    updateUI(mod);
+                },
                 renderPattern: function(evt, patNo) {
                     var pat = mod.patterns[patNo];
                     // there is a span already in the pattern
@@ -612,9 +634,6 @@
                 for (var i = 0; i < mod.patterns.length; i+=1) {
                     patternView.appendChild(getPatSpan(mod.patterns[i], "pat "+i));
                 }
-                // render an additional pattern so a new one can be created.
-                var newPat = newPattern(mod.numChannels, mod.patterns[0].numRows, i);
-                patternView.appendChild(getPatSpan(newPat, "new pattern ("+i+")"));
 
                 var instrumentView = document.getElementById('instrumentView');
                 rmChildren(instrumentView);
@@ -623,8 +642,6 @@
                     var inst = mod.instruments[i];
                     instrumentView.appendChild(getInstSpan(inst, i, rightjustify(i,2)+" "+inst.name));
                 }
-                // render an additional, instrument so a new instrument can be added.
-                instrumentView.appendChild(getInstSpan(mod.instruments[0], i, "new instrument"));
             }
             function getPatSpan(pat, patName) {
                 var i = pat.patNumber;
@@ -794,10 +811,13 @@
             sequence: <input id='sequence' type='text' size='15' onkeypress="neuralyteTracker.updateMod(event)"/>
         </div>
         <div id='instruments'><span class='spanlabel'>instruments</span>
+            <span><a href='#' onClick='neuralyteTracker.addNewInstrument()'>add new</a></span>
             <div id='instrumentView'></div>
             <div id='sampleView'></div>
         </div>
-        <div id='patternView'><span class='spanlabel'>paterns</span>
+        <div id='patterns'><span class='spanlabel'>patterns</span>
+            <span><a href='#' onClick='neuralyteTracker.addNewPattern()'>add new</a></span>
+            <div id='patternView'></div>
         </div>
 
         <br/>

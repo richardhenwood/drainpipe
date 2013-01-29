@@ -74,6 +74,8 @@ public class IBXM {
 			channels[ idx ] = new Channel( module, idx, sampleRate * OVERSAMPLE, globalVol );
 		for( int idx = 0, end = rampLen * 2; idx < end; idx++ ) rampBuffer[ idx ] = 0;
 		filtL = filtR = 0;
+		if(module.getPatterns().size() == 0)
+			return;
 		tick();
 	}
 	public void __setPatternLoop( int patNo ) {
@@ -118,6 +120,8 @@ public class IBXM {
 	/* Returns the song duration in samples at the current sampling rate. */
 	public int calculateSongDuration() {
 		int duration = 0;
+		if(module.getPatterns().size() == 0)
+			return duration;
 		setSequencePos( 0 );
 		boolean songEnd = false;
 		while( !songEnd ) {

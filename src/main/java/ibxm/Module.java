@@ -25,7 +25,9 @@ public class Module {
 	};
 
 	public Module() {
-		patterns.add(new Pattern(4, 64, 0));
+		//patterns.add(new Pattern(4, 64, 0));
+		// add a 'blank' instrument. This is inconsistent with the behavior for patterns,
+		// and should be fixed.
 		instruments.add(new Instrument());
 	}
 	
@@ -510,7 +512,7 @@ public class Module {
 		}
 	}
 
-	public void toStringBuffer( StringBuffer out ) {
+	public void __toStringBuffer( StringBuffer out ) {
 		out.append( "Song Name: " + songName + '\n'
 			+ "Num Channels: " + numChannels + '\n'
 			+ "Num Instruments: " + this.instruments.size() + '\n'
