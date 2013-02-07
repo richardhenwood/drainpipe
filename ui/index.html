@@ -400,7 +400,7 @@
                     updateUI(mod);
                 },
                 addNewInstrument: function(evt) {
-                    var inst = mod.instruments[0];
+                    var inst = Object.create(mod.instruments[0]);
                     inst.name = prompt("instrument name", "");
                     inst.samples = Array(newSample(null, 'new sample'));
                     mod.instruments[mod.instruments.length] = inst;
