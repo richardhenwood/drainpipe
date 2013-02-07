@@ -447,7 +447,7 @@ public class TrackerResource {
     		e.printStackTrace();
 
     	}
-    	return("{location: '"+saveLocation+"'}");
+    	return("{saveLocation: '"+saveLocation+"'}");
     	
     	//return Response.seeOther(new URI(saveLocation)).build();
     }

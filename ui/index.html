@@ -204,7 +204,7 @@
                     if(xmlhttp.status == 200) {
                         console.log("new jsong created");
                         console.log(xmlhttp.responseText);
-                        targetpath = eval("("+xmlhttp.responseText+")").location;
+                        targetpath = eval("("+xmlhttp.responseText+")").saveLocation;
                         mod = null;
                     }
                     else {
@@ -240,9 +240,13 @@
                     console.log("saving: " + storeURL);  
                     xmlhttp.open('GET', storeURL, false); 
                     xmlhttp.send(null);
-                    if(xmlhttp.status == 200)
-                        console.log(storeURL);      
-                    modglobals = eval("("+xmlhttp.responseText+")");
+                    if(xmlhttp.status == 200) {
+                        console.log(xmlhttp.responseText);
+                        targetpath = eval("("+xmlhttp.responseText+")").saveLocation;
+                    }
+                    else {
+                        console.log("can not create new jsong");
+                    }
                     stopWorking();
                 },
                 saveJsong: function() {
