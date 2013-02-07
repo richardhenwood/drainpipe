@@ -454,16 +454,23 @@
                     patSpan.appendChild(numRows);
                     patSpan.appendChild(patTable);
                     var patExpander = document.getElementById('pat_' + patNo+'_expander');
-                    patExpander.innerHTML = '-';
-                    patExpander.setAttribute('onclick', 'neuralyteTracker.removePattern(event,'+patNo+')');
+                    var aRemovePattern = document.createElement('a');
+                    aRemovePattern.href = '#';
+                    aRemovePattern.innerHTML = '-';
+                    aRemovePattern.setAttribute('onclick', 'neuralyteTracker.removePattern(event,'+patNo+'); return false;');
+                    patExpander.appendChild(aRemovePattern);
                     console.log(patExpander);
                 },
                 removePattern: function (evt, patNo) {
                     var patTable = document.getElementById('pat_' + patNo +'_table');
                     patTable.parentNode.removeChild(patTable);
                     var patExpander = document.getElementById('pat_' + patNo+'_expander');
-                    patExpander.innerHTML = '+';
-                    patExpander.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+patNo+')');
+                    var aRemovePattern = document.createElement('a');
+                    aRemovePattern.href = '#';
+                    aRemovePattern.innerHTML = '+';
+                    aRemovePattern.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+patNo+') return false;');
+                    patExpander.appendChild(aRemovePattern);
+                    console.log(patExpander);
                 },
                 noteChange: function (evt) {
                     var bits, pat, row, chan, dataidx, celldiv;
@@ -657,11 +664,11 @@
                 patA.href = '#';
                 patA.innerHTML = '+';
                 patA.id = 'pat_'+pat.patNumber+'_expander';
-                patA.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+i+')');
+                patA.setAttribute('onclick', 'neuralyteTracker.renderPattern(event,'+i+'); return false;');
                 var patB = document.createElement('a');
                 patB.href = '#';
                 patB.innerHTML = '>';
-                patB.setAttribute('onclick', 'neuralyteTracker.loopPattern(event,'+i+')');
+                patB.setAttribute('onclick', 'neuralyteTracker.loopPattern(event,'+i+'); return false;');
                 patSpan.appendChild(patText);
                 patSpan.appendChild(patA);
                 patSpan.appendChild(patB);
@@ -685,7 +692,7 @@
                 var instA = document.createElement('a');
                 instA.href = "#";
                 instA.innerHTML = instName;
-                instA.onclick = new Function("neuralyteTracker.renderInstrument("+instNo+")");
+                instA.onclick = new Function("neuralyteTracker.renderInstrument("+instNo+"); return false;");
                 instSpan.appendChild(instA);
                 return instSpan;
             }
@@ -815,12 +822,12 @@
             sequence: <input id='sequence' type='text' size='15' onkeypress="neuralyteTracker.updateMod(event)"/>
         </div>
         <div id='instruments'><span class='spanlabel'>instruments</span>
-            <span><a href='#' onClick='neuralyteTracker.addNewInstrument()'>add new</a></span>
+            <span><a href='#' onClick='neuralyteTracker.addNewInstrument(); return false;'>add new</a></span>
             <div id='instrumentView'></div>
             <div id='sampleView'></div>
         </div>
         <div id='patterns'><span class='spanlabel'>patterns</span>
-            <span><a href='#' onClick='neuralyteTracker.addNewPattern()'>add new</a></span>
+            <span><a href='#' onClick='neuralyteTracker.addNewPattern(); return false;'>add new</a></span>
             <div id='patternView'></div>
         </div>
 
