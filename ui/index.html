@@ -294,7 +294,7 @@
                     currentStatus = eval("("+xmlhttp.responseText+")");
                 },
                 updateMod: function(evt) {
-                   if (evt.keyCode == 13) {
+                   if (evt.keyCode == 13) { // 13 == enter.
                        mod[evt.target.id] = document.getElementById(evt.target.id).value;
                        if (evt.target.id == 'sequence') {
                            console.log('making sequence an array');
