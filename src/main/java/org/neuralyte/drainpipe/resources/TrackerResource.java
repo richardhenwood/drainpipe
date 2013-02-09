@@ -460,7 +460,7 @@ public class TrackerResource {
     	Gson gson = new Gson();
     	Module mod = gson.fromJson(incomingJson, Module.class);
     	tracker.getPlayer().setModule(mod);
-    	System.out.println("new mod loaded from json");
+     	System.out.println("new mod loaded from json");
     	return "{save:'complete'}";
     }
 }

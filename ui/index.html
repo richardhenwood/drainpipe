@@ -487,8 +487,13 @@
                     console.log("before:");
                     console.log("row: " + row + " pat: " + pat + " chan: " + chan + " dataidx: " + dataidx);
                     console.log(mod.patterns[pat].data[dataidx]);
-                    mod.patterns[pat].data[dataidx] = eval("new Array("+evt.currentTarget.childNodes[0].value+");");
-                    //mod.numPatterns = Math.max(mod.numPatterns, parseInt(pat) + 1);
+                    // do a little dance to ensure we push a 5 element array 
+                    // as a new pattern element.
+                    var tmpNote = eval("new Array("+evt.currentTarget.childNodes[0].value+");");
+                    while (tmpNote.length < 5) {
+                        tmpNote.push(0);
+                    }
+                    mod.patterns[pat].data[dataidx] = tmpNote.slice(0, 5);
                     console.log("after :");
                     console.log(mod.patterns[pat].data[dataidx]);
                     neuralyteTracker.putPattern(pat, mod.patterns[pat]);
