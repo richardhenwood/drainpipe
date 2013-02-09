@@ -129,6 +129,9 @@
             font-family: monospace;
             size: 3;
         }
+        .instClass {
+            margin-top: 0px;
+        }
         .vol {
             color: yellow;
             background-color: #d8da3d;
@@ -693,7 +696,7 @@
             function getInstSpan(inst, instNo, instName) {
                 var instSpan = document.createElement('div');
                 instSpan.id = "inst_"+instNo;
-                instSpan.class = 'instClass';
+                instSpan.className = 'instClass';
                 var instA = document.createElement('a');
                 instA.href = "#";
                 instA.innerHTML = instName;
