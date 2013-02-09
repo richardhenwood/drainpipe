@@ -137,7 +137,7 @@ public class TrackerResource {
     	tracker = Tracker.getInstance();
     	tracker.newModule();
     	/*try {
-    		// TODO: a new modules really should be availabe as a constructor.
+    		// TODO: a new modules really should be available as a constructor.
 			//tracker.loadModule(new URL("http://neuralyte.org/~ig0r/new.xm"));
     		
 		} catch (MalformedURLException e) {
@@ -149,8 +149,8 @@ public class TrackerResource {
 		}*/
     	
     	//return Response.created(new URI(songName));
-    	return this.save(songName);
-    	//return("{location: '"+songName+"'}");
+    	//return this.savecopy(songName);
+    	return("{saveLocation: 'NOT_SAVED'}");
     }
     
     @GET @Path("{songname}")
@@ -160,12 +160,13 @@ public class TrackerResource {
     	System.out.println("'"+songName+"'");
     	
     	tracker = Tracker.getInstance();
-    	if (loadedModURL == null || !songName.endsWith(loadedModURL)) {
+    	if ((loadedModURL == null || !songName.endsWith(loadedModURL)) 
+    			&& !songName.equals("NOT_SAVED")) {
     		tracker.loadModule(new URL(URLDecoder.decode(songName, "ISO-8859-1")));
     		loadedModURL = songName;
     	}
     	else {
-    		System.out.println("Tune already loaded, ignoring load request.");
+    		System.out.println("Tune already loaded, or a new tune, ignoring load request.");
     	}
 
     	Module mod = tracker.getPlayer().getModule();
@@ -402,16 +403,17 @@ public class TrackerResource {
 //    	return "massive regression: this isn't supported now";
     }
     
-    @GET @Path("{songname}/save")
+    @GET @Path("{songname}/savecopy/{docStore}")
     @Produces("application/json")
-    public String save(@PathParam("songname") String songName) {
+    public String savecopy(@PathParam("songname") String songName, @PathParam("docStore") String docStore) {
     	//Object module = tracker.getPlayer().getModule();
     	Module module = tracker.getPlayer().getModule();
     	Gson gson = new Gson();
     	String json = gson.toJson(module);
     	String saveLocation = null;
     	try {
-    		URL url = new URL("http://drainpipe.iriscouch.com/jsong");
+    		// "http://drainpipe.iriscouch.com/jsong"
+    		URL url = new URL(URLDecoder.decode(docStore, "ISO-8859-1"));
     		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     		conn.setDoOutput(true);
     		conn.setRequestMethod("POST");
@@ -452,9 +454,10 @@ public class TrackerResource {
     	//return Response.seeOther(new URI(saveLocation)).build();
     }
     
-    @POST @Path("{songname}/save")
+    // This method 
+    @POST @Path("{songname}/jsong")
     @Produces("application/json")
-    public String save(@PathParam("songname") String songName, String incomingJson) {       	
+    public String jsong(@PathParam("songname") String songName, String incomingJson) {       	
     	Tracker tracker = Tracker.getInstance();
     	
     	Gson gson = new Gson();

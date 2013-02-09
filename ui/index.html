@@ -55,7 +55,7 @@
             float: left;
             width: 100px;
         }
-        #modbrowser {
+        #tuneBrowser {
             width: 200px;
             float: left;
             background-color: #00ff00;
@@ -100,7 +100,7 @@
             height: 200px;
             background-color: #ffcccc;
         }
-        #modMetadata {
+        #tuneMetadata {
             width: 250px;
             float: left;
             background-color: #ff88ff;
@@ -178,8 +178,8 @@
         }
 
         var neuralyteTracker = (function() {
-            mod = null;
-            //var mod = null; //uncomment this to make it private
+            jsong = null;
+            //var jsong = null; //uncomment this to make it private
             var readURL = null;
             var xmlhttp = new XMLHttpRequest();
             var targetpath = null;
@@ -208,7 +208,7 @@
                         console.log("new jsong created");
                         console.log(xmlhttp.responseText);
                         targetpath = eval("("+xmlhttp.responseText+")").saveLocation;
-                        mod = null;
+                        jsong = null;
                     }
                     else {
                         console.log("can not create new jsong");
@@ -228,18 +228,36 @@
                     xmlhttp.open('GET', readRoot, false); 
                     xmlhttp.send(null);
                     if(xmlhttp.status == 200) {
-                        mod = eval("("+xmlhttp.responseText+")");
+                        jsong = eval("("+xmlhttp.responseText+")");
                     }
                     else {
                         console.log("can't load");
                     }
                     console.log("load complete");
                     stopWorking();
-                    updateUI(mod);
+                    updateUI(jsong);
                 },
                 save: function(storeURL) {
                     startWorking();
-                    var storeURL = apiRoot+"/" + apiName + "/save";
+                    alert('not implemented');
+                    //var storeURL = apiRoot+"/" + apiName + "/save";
+                    //console.log("saving: " + storeURL);  
+                    //xmlhttp.open('GET', storeURL, false); 
+                    //xmlhttp.send(null);
+                    //if(xmlhttp.status == 200) {
+                    //    console.log(xmlhttp.responseText);
+                    //    targetpath = eval("("+xmlhttp.responseText+")").saveLocation;
+                    //}
+                    //else {
+                    //    console.log("can not create new jsong");
+                    //}
+                    stopWorking();
+                },
+                savecopy: function(storeURL) {
+                    startWorking();
+                    var docStore = document.getElementById('docStore').value;
+                    docStore = encodeURIComponent(docStore);
+                    var storeURL = apiRoot+"/" + apiName + "/savecopy/" + docStore;
                     console.log("saving: " + storeURL);  
                     xmlhttp.open('GET', storeURL, false); 
                     xmlhttp.send(null);
@@ -253,7 +271,7 @@
                     stopWorking();
                 },
                 saveJsong: function() {
-                    window.open( "data:text/json;charset=utf-8," + escape(JSON.stringify(mod)))
+                    window.open( "data:text/json;charset=utf-8," + escape(JSON.stringify(jsong)))
                 },
                 play: function() {
                     var playURL = apiRoot+"/" + apiName + "/play";
@@ -285,7 +303,7 @@
                 },
                 updateUI: function() {
                     startWorking();
-                    updateUI(mod);
+                    updateUI(jsong);
                     stopWorking();
                 },
                 getStatus: function() {
@@ -296,34 +314,33 @@
                         console.log(statusUri);      
                     currentStatus = eval("("+xmlhttp.responseText+")");
                 },
-                updateMod: function(evt) {
+                updateJsong: function(evt) {
                    if (evt.keyCode == 13) { // 13 == enter.
-                       mod[evt.target.id] = document.getElementById(evt.target.id).value;
+                       jsong[evt.target.id] = document.getElementById(evt.target.id).value;
                        if (evt.target.id == 'sequence') {
                            console.log('making sequence an array');
-                           mod[evt.target.id] = eval('['+mod[evt.target.id]+']');
-                           //mod.sequenceLength = mod[evt.target.id].length;
+                           jsong[evt.target.id] = eval('['+jsong[evt.target.id]+']');
                        }
-                       neuralyteTracker.putMod();
+                       neuralyteTracker.putJsong();
                    }
                 },
-                putMod: function() {
+                putJsong: function() {
                     startWorking();
-                    putModURL = apiRoot+"/" + apiName + "/save";
-                    xmlhttp.open('POST', putModURL, false); 
-                    xmlhttp.send(JSON.stringify(mod));
+                    putJsongURL = apiRoot+"/" + apiName + "/jsong";
+                    xmlhttp.open('POST', putJsongURL, false); 
+                    xmlhttp.send(JSON.stringify(jsong));
                     if(xmlhttp.status == 200)
-                        console.log(putModURL);      
-                    modglobals = eval("("+xmlhttp.responseText+")");
-                    console.log(modglobals);
+                        console.log(putJsongURL);      
+                    jsongglobals = eval("("+xmlhttp.responseText+")");
+                    console.log(jsongglobals);
                     stopWorking();
                 },
                 renderInstrument: function(instNo) {
-                    var inst = mod.instruments[instNo];
+                    var inst = jsong.instruments[instNo];
                     if (typeof inst == 'undefined') {
-                        inst = mod.instruments[0];
+                        inst = jsong.instruments[0];
                         inst.samples = Array(newSample(null, 'new sample'));
-                        mod.instruments[instNo] = inst;
+                        jsong.instruments[instNo] = inst;
                     }
                     console.log(inst);
                     var instSpan = document.getElementById('inst_'+instNo);
@@ -339,7 +356,7 @@
                     }
                 },
                 renderSample: function(instNo, sampNo) {
-                    var samp = mod.instruments[instNo].samples[sampNo];
+                    var samp = jsong.instruments[instNo].samples[sampNo];
                     var sampView = document.getElementById('sampleView');
                     while (sampView.hasChildNodes()) {
                         sampView.removeChild(sampView.lastChild);
@@ -378,7 +395,7 @@
                             samp.relNote = parseInt(x.target.value);
                             var n = x.target.parentElement.id.split('_'); 
                             console.log(samp);
-                            neuralyteTracker.putSample(n[1], n[2], mod.instruments[n[1]].samples[n[2]]);
+                            neuralyteTracker.putSample(n[1], n[2], jsong.instruments[n[1]].samples[n[2]]);
                     });
                     var c2RateText = document.createTextNode("c2Rate");
                     var c2Rate = document.createElement('input');
@@ -388,8 +405,8 @@
                             // this updates the server with the new values.
                             samp.c2Rate = parseInt(x.target.value);
                             var n = x.target.parentElement.id.split('_'); 
-                            console.log(mod);
-                            neuralyteTracker.putSample(n[1], n[2], mod.instruments[n[1]].samples[n[2]]);
+                            console.log(jsong);
+                            neuralyteTracker.putSample(n[1], n[2], jsong.instruments[n[1]].samples[n[2]]);
                     });
 
                     sampSpan.appendChild(sampUpload);
@@ -402,27 +419,27 @@
                 },
                 addNewPattern: function(evt) {
                     var numRows = parseInt(prompt("number of rows", 64));
-                    var pat = new newPattern(mod.numChannels, numRows, mod.patterns.length);
-                    mod.patterns[mod.patterns.length] = pat;
-                    updateUI(mod);
+                    var pat = new newPattern(jsong.numChannels, numRows, jsong.patterns.length);
+                    jsong.patterns[jsong.patterns.length] = pat;
+                    updateUI(jsong);
                 },
                 addNewInstrument: function(evt) {
-                    var inst = Object.create(mod.instruments[0]);
+                    var inst = Object.create(jsong.instruments[0]);
                     inst.name = prompt("instrument name", "");
                     inst.samples = Array(newSample(null, 'new sample'));
-                    mod.instruments[mod.instruments.length] = inst;
-                    updateUI(mod);
+                    jsong.instruments[jsong.instruments.length] = inst;
+                    updateUI(jsong);
                 },
                 renderPattern: function(evt, patNo) {
-                    var pat = mod.patterns[patNo];
+                    var pat = jsong.patterns[patNo];
                     // there is a span already in the pattern
                     // dom object because one is created 
                     // in the 'private' method 'updateUI'.
                     // This design is terriable and should be
                     // fixed.
                     if (typeof pat == 'undefined') {
-                        pat = newPattern(mod.numChannels, mod.patterns[0].numRows, patNo);
-                        mod.patterns[patNo] = pat;
+                        pat = newPattern(jsong.numChannels, jsong.patterns[0].numRows, patNo);
+                        jsong.patterns[patNo] = pat;
                     }
                     var patSpan = document.getElementById('pat_' + patNo);
                     console.log("rendering pattern: " + patNo);
@@ -434,7 +451,7 @@
                             // this updates the server with the new values.
                             pat.numRows = parseInt(x.target.value);
                             var n = x.target.parentElement.id.split('_'); 
-                            console.log(mod);
+                            console.log(jsong);
                             neuralyteTracker.putPattern(patNumber, pat);
                     });
                     var patTable = document.createElement('table');
@@ -445,8 +462,8 @@
                         rowtd.class = 'pat_row';
                         rowtd.innerHTML = row.toString(16);
                         tr.appendChild(rowtd);
-                        for (var chan = 0; chan < mod.numChannels; chan += 1) { 
-                            var td = getRow(patNo, pat, row, chan, mod.numChannels);
+                        for (var chan = 0; chan < jsong.numChannels; chan += 1) { 
+                            var td = getRow(patNo, pat, row, chan, jsong.numChannels);
                             td.id = "cell_"+ patNo+ "_" + row + "_" + chan;
                             td.onchange = this.noteChange;
                             tr.appendChild(td);
@@ -485,40 +502,40 @@
                     pat = bits[1];
                     row = bits[2];
                     chan = bits[3];
-                    dataidx = parseInt((row * mod.numChannels) + parseInt(chan));
+                    dataidx = parseInt((row * jsong.numChannels) + parseInt(chan));
 
                     console.log("before:");
                     console.log("row: " + row + " pat: " + pat + " chan: " + chan + " dataidx: " + dataidx);
-                    console.log(mod.patterns[pat].data[dataidx]);
+                    console.log(jsong.patterns[pat].data[dataidx]);
                     // do a little dance to ensure we push a 5 element array 
                     // as a new pattern element.
                     var tmpNote = eval("new Array("+evt.currentTarget.childNodes[0].value+");");
                     while (tmpNote.length < 5) {
                         tmpNote.push(0);
                     }
-                    mod.patterns[pat].data[dataidx] = tmpNote.slice(0, 5);
+                    jsong.patterns[pat].data[dataidx] = tmpNote.slice(0, 5);
                     console.log("after :");
-                    console.log(mod.patterns[pat].data[dataidx]);
-                    neuralyteTracker.putPattern(pat, mod.patterns[pat]);
+                    console.log(jsong.patterns[pat].data[dataidx]);
+                    neuralyteTracker.putPattern(pat, jsong.patterns[pat]);
                     
                     // this is the pretty way to render the cell elements:
                     //celldiv = document.getElementById(evt.currentTarget.id),
                     //if (evt.target.className == "note") {
-                    //    mod.patterns[pat].data[dataidx][0] = evt.target.value.replace(".","");
+                    //    jsong.patterns[pat].data[dataidx][0] = evt.target.value.replace(".","");
                     //}
                     //if (evt.target.className == "inst") {
-                    //    mod.patterns[pat].data[dataidx][1] = parseInt(evt.target.value.replace(".",""));
+                    //    jsong.patterns[pat].data[dataidx][1] = parseInt(evt.target.value.replace(".",""));
                     //}
                     //if (evt.target.className == "vol") {
-                    //    mod.patterns[pat].data[dataidx][2] = parseInt(evt.target.value.replace(".",""));
+                    //    jsong.patterns[pat].data[dataidx][2] = parseInt(evt.target.value.replace(".",""));
                     //}
                     //if (evt.target.className == "type") {
-                    //    mod.patterns[pat].data[dataidx][3] = parseInt(evt.target.value.replace(".",""));
+                    //    jsong.patterns[pat].data[dataidx][3] = parseInt(evt.target.value.replace(".",""));
                     //}
                     //if (evt.target.className == "effval") {
-                    //    mod.patterns[pat].data[dataidx][4] = parseInt(evt.target.value.replace(".",""));
+                    //    jsong.patterns[pat].data[dataidx][4] = parseInt(evt.target.value.replace(".",""));
                     //}
-                    //neuralyteTracker.putPattern(pat, mod.patterns[pat]);
+                    //neuralyteTracker.putPattern(pat, jsong.patterns[pat]);
                 },
                 putPattern: function (patNo, patDat) {
                     startWorking();
@@ -527,7 +544,7 @@
                     xmlhttp.send(JSON.stringify(patDat));
                     if(xmlhttp.status == 200)
                         console.log(putPatURL);      
-                    //modglobals = eval("("+xmlhttp.responseText+")");
+                    //jsongglobals = eval("("+xmlhttp.responseText+")");
                     console.log("pattern updated");
                     stopWorking();
                 },
@@ -539,7 +556,7 @@
                     xmlhttp.send(JSON.stringify(sampDat));
                     if(xmlhttp.status == 200)
                         console.log(putSampURL);      
-                    //modglobals = eval("("+xmlhttp.responseText+")");
+                    //jsongglobals = eval("("+xmlhttp.responseText+")");
                     console.log("sample updated");
                     stopWorking();
                 }
@@ -555,12 +572,12 @@
                     var decoder = new WAVDecoder();
                     var decoded = decoder.decode(e.target.result);
                     var scale = Math.pow(2, decoded.bitDepth)/2.0; // divide by to because we are using signed ints.
-                    var modInst = new Array(decoded.length);
+                    var jsongInst = new Array(decoded.length);
                     for (var i = 0; i < decoded.length; i += 1) {
-                        modInst[i] = Math.round(decoded.channels[0][i]*scale);
+                        jsongInst[i] = Math.round(decoded.channels[0][i]*scale);
                     }
                     console.log(file);
-                    setNewSample(modInst, evt.target.id, file.name, 8363, 0);
+                    setNewSample(jsongInst, evt.target.id, file.name, 8363, 0);
                 }
                 reader.readAsBinaryString(oFile);
             }
@@ -576,9 +593,9 @@
                     'relNote': relNote,
                     'sampleData': dat,
                     'volume': 64};
-                mod.instruments[n[1]].samples[n[2]] = sampJson;
+                jsong.instruments[n[1]].samples[n[2]] = sampJson;
                 var sampCanvas = document.getElementById(n[0] +"_"+ n[1] +"_"+ n[2] +'_canvas');
-                //console.log(mod.instruments[n[1]].samples[n[2]][0].sampleData);
+                //console.log(jsong.instruments[n[1]].samples[n[2]][0].sampleData);
                 console.log('new sample data is set. inst ' + n[1] + ' sample ' + n[2]);
                 drawSample(sampCanvas.getContext('2d'), dat);
                 neuralyteTracker.putSample(n[1], n[2], sampJson);
@@ -639,26 +656,26 @@
                     node.removeChild(node.lastChild);
                 }
             }
-            function updateUI(mod) {
-                for (var key in mod) {
-                    if (mod.hasOwnProperty(key)) {
+            function updateUI(jsong) {
+                for (var key in jsong) {
+                    if (jsong.hasOwnProperty(key)) {
                         var node = document.getElementById(key);
                         if (node != null) {
-                            node.value = mod[key];
+                            node.value = jsong[key];
                         }
                     }
                 }
                 var patternView = document.getElementById('patternView');
                 rmChildren(patternView);
-                for (var i = 0; i < mod.patterns.length; i+=1) {
-                    patternView.appendChild(getPatSpan(mod.patterns[i], "pat "+i));
+                for (var i = 0; i < jsong.patterns.length; i+=1) {
+                    patternView.appendChild(getPatSpan(jsong.patterns[i], "pat "+i));
                 }
 
                 var instrumentView = document.getElementById('instrumentView');
                 rmChildren(instrumentView);
                 var i;
-                for (i = 1; i < mod.instruments.length; i += 1) {
-                    var inst = mod.instruments[i];
+                for (i = 1; i < jsong.instruments.length; i += 1) {
+                    var inst = jsong.instruments[i];
                     instrumentView.appendChild(getInstSpan(inst, i, rightjustify(i,2)+" "+inst.name));
                 }
             }
@@ -803,16 +820,18 @@
 
 </script>
     <body onLoad="init();"> 
-        <div id='title'>NeuralyteTracker v0.1.0 <span id='working'></span>mod target: <span id='targetpath'></span></div>
+        <div id='title'>NeuralyteTracker v0.1.0 <span id='working'></span>tune target: <span id='targetpath'></span></div>
         <span id='trackerUI'>
-        <div id='modBrowser'><span class='spanlabel'>file</span>
+        <div id='tuneBrowser'><span class='spanlabel'>file</span>
             load {xm,s3m,mod,jsong} from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
             <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a> or 
             <a href='#' class='but' onClick='neuralyteTracker.new();'>new</a> <br/>
+            <input id='docStore' type="text" size="25" value=""/>
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a>
+            <a href='#' id='savecopyURL' type='text' class='but' onClick='neuralyteTracker.savecopy("saveURL");'>save a copy</a>
         </div>
         <div id='debug'><span class='spanlabel'>debug</span>
-            <a href='#' id='putMod' type='text' class='but' onClick='neuralyteTracker.putMod("");'>pushJsong</a>
+            <a href='#' id='putJsong' type='text' class='but' onClick='neuralyteTracker.putJsong("");'>pushJsong</a>
             <a href='#' type='text' class='but' onClick='neuralyteTracker.saveJsong("");'>saveJsong</a>
             <a href='#' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a>
             <a href='#' type='text' class='but' onClick='neuralyteTracker.getStatus("");'>get status</a>
@@ -822,12 +841,12 @@
             <a href='#' class='but' id='stopbutton' onClick='neuralyteTracker.pause();'>pause</a><br/>
             <a href='#' class='but' id='stopbutton' onClick='neuralyteTracker.restart();'>restart</a><br/>
         </div>
-        <div id='modMetadata'><span class='spanlabel'>globals</span>
-            mod name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateMod(event)"/></br>
-            gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/></br>
-            defaultSpeed: <input id='defaultSpeed' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/></br>
-            defaultTempo: <input id='defaultTempo' type='text' size='5' onkeypress="neuralyteTracker.updateMod(event)"/>
-            sequence: <input id='sequence' type='text' size='15' onkeypress="neuralyteTracker.updateMod(event)"/>
+        <div id='tuneMetadata'><span class='spanlabel'>globals</span>
+            tune name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateJsong(event)"/></br>
+            gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateJsong(event)"/></br>
+            defaultSpeed: <input id='defaultSpeed' type='text' size='5' onkeypress="neuralyteTracker.updateJsong(event)"/></br>
+            defaultTempo: <input id='defaultTempo' type='text' size='5' onkeypress="neuralyteTracker.updateJsong(event)"/>
+            sequence: <input id='sequence' type='text' size='15' onkeypress="neuralyteTracker.updateJsong(event)"/>
         </div>
         <div id='instruments'><span class='spanlabel'>instruments</span>
             <span><a href='#' onClick='neuralyteTracker.addNewInstrument(); return false;'>add new</a></span>
@@ -856,12 +875,13 @@
         pattern cells are in order, left to right: note, inst, vol, eff, effval.
 
         I couldn't get a webserver configured to serve static pages so i've hacked it to lookup this page.<p/>
-        Currently supported endpoints - all assume /drainpipe/&lt;encoded uri to mod&gt;/
+        Currently supported endpoints - all assume /drainpipe/&lt;encoded uri to tune&gt;/. A tune is either a mod, xm, s3m, jsong, or a zip containing a mod, xm, s3m.
 
         <table>
             <tr><th>name</th><th>GET</th><th>POST</th><th>CREATE</th><th>DELETE</th><th>notes</th></tr>
             <tr><td>play</td><td>X</td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>save</td><td>X</td><td></td><td></td><td></td><td>saves jsong to doc-store (iriscouch.com)</td></tr>
+            <tr><td>save</td><td>X</td><td></td><td></td><td></td><td>save jsong to jsongtarget, provided it's writable, like iriscouch.com</td></tr>
+            <tr><td>savecopy </td><td>X</td><td></td><td></td><td></td><td>saves jsong to a specified doc-store (iriscouch.com)</td></tr>
             <tr><td>restart</td><td>X</td><td></td><td></td><td></td><td></td></tr>
             <tr><td>stop</td><td>X</td><td></td><td></td><td></td><td></td></tr>
             <tr><td>global_volume</td><td>X</td><td>X</td><td></td><td></td><td>This is a setup value for the mod. If you alter this value, you need to restart the tune to hear the effect.</td></tr>
@@ -869,6 +889,7 @@
             <tr><td>patterns</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
             <tr><td>instruments</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
             <tr><td>samples</td><td>X</td><td>X</td><td></td><td></td><td>Samples included in instruments.</td></tr>
+            <tr><td>jsong</td><td></td><td>X</td><td></td><td></td><td>Pushes the whole client side jsong DOM entry to the server.</td></tr>
 
         </table>
 
