@@ -348,6 +348,17 @@
                        neuralyteTracker.putJsong();
                    //}
                 },
+                getJsong: function() {
+                    startWorking();
+                    var getJsongURL = apiRoot+"/" + apiName + "/jsong";
+                    xmlhttp.open('GET', getJsongURL, false); 
+                    xmlhttp.send(null);
+                    if(xmlhttp.status == 200) {
+                        console.log(getJsongURL);      
+                        jsong = eval("("+xmlhttp.responseText+")");
+                    }
+                    stopWorking();
+                },
                 putJsong: function() {
                     startWorking();
                     var putJsongURL = apiRoot+"/" + apiName + "/jsong";
@@ -583,6 +594,15 @@
                     //jsongglobals = eval("("+xmlhttp.responseText+")");
                     console.log("sample updated");
                     stopWorking();
+                },
+                displayDebug: function () {
+                    var debugDiv = document.getElementById('debug');
+                    if(document.getElementById('showDebug').checked) {
+                        debugDiv.style.display = 'inline';
+                    }
+                    else {
+                        debugDiv.style.display = 'none';
+                    }
                 }
             }
             function loadWavFile (evt) {
@@ -844,7 +864,7 @@
 
 </script>
     <body onLoad="init();"> 
-        <div id='title'>NeuralyteTracker v0.4.1 <span id='working'></span>tune target: <span id='targetpath'></span></div>
+        <div id='title'>NeuralyteTracker v0.4.1 <span id='working'></span>tune target: <span id='targetpath'></span><span style='float:right;'>Show debug<input  id='showDebug' name=cb1 value=test type=checkbox onchange='neuralyteTracker.displayDebug()' checked></span></div>
         <span id='trackerUI'>
         <div id='tuneBrowser'><span class='spanlabel'>file</span>
             load {xm,s3m,mod,jsong} from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
@@ -853,12 +873,6 @@
             <input id='docStore' type="text" size="25" value=""/>
             <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save();'>save</a>
             <a href='#' id='savecopyURL' type='text' class='but' onClick='neuralyteTracker.savecopy("saveURL");'>save a copy</a>
-        </div>
-        <div id='debug'><span class='spanlabel'>debug</span>
-            <a href='#' id='putJsong' type='text' class='but' onClick='neuralyteTracker.putJsong("");'>pushJsong</a>
-            <a href='#' type='text' class='but' onClick='neuralyteTracker.saveJsong("");'>saveJsong</a>
-            <a href='#' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a>
-            <a href='#' type='text' class='but' onClick='neuralyteTracker.getStatus("");'>get status</a>
         </div>
         <div id='rendercontrols'><span class='spanlabel'>controls</span>
             <a href='#' class='but' id='playbutton' onClick='neuralyteTracker.play();'>play</a><br/>
@@ -876,6 +890,13 @@
             <span><a href='#' onClick='neuralyteTracker.addNewInstrument(); return false;'>add new</a></span>
             <div id='instrumentView'></div>
             <div id='sampleView'></div>
+        </div>
+        <div id='debug'><span class='spanlabel'>debug</span>
+            <a href='#' id='getJsong' type='text' class='but' onClick='neuralyteTracker.getJsong("");'>getJsong</a>
+            <a href='#' id='putJsong' type='text' class='but' onClick='neuralyteTracker.putJsong("");'>pushJsong</a>
+            <a href='#' type='text' class='but' onClick='neuralyteTracker.saveJsong("");'>saveJsong</a>
+            <a href='#' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a>
+            <a href='#' type='text' class='but' onClick='neuralyteTracker.getStatus("");'>get status</a>
         </div>
         <div id='patterns'><span class='spanlabel'>patterns</span>
             <span><a href='#' onClick='neuralyteTracker.addNewPattern(); return false;'>add new</a></span>
@@ -908,12 +929,11 @@
             <tr><td>savecopy </td><td>X</td><td></td><td></td><td></td><td>saves jsong to a specified doc-store (iriscouch.com)</td></tr>
             <tr><td>restart</td><td>X</td><td></td><td></td><td></td><td></td></tr>
             <tr><td>stop</td><td>X</td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>global_volume</td><td>X</td><td>X</td><td></td><td></td><td>This is a setup value for the mod. If you alter this value, you need to restart the tune to hear the effect.</td></tr>
             <tr><td>sequence</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
             <tr><td>patterns</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
             <tr><td>instruments</td><td>X</td><td>X</td><td></td><td></td><td></td></tr>
             <tr><td>samples</td><td>X</td><td>X</td><td></td><td></td><td>Samples included in instruments.</td></tr>
-            <tr><td>jsong</td><td></td><td>X</td><td></td><td></td><td>Pushes the whole client side jsong DOM entry to the server.</td></tr>
+            <tr><td>jsong</td><td>X</td><td>X</td><td></td><td></td><td>Pushes the whole client side jsong DOM entry to the server.</td></tr>
 
         </table>
 
