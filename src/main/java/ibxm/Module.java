@@ -15,6 +15,8 @@ public class Module {
 	public boolean linearPeriods = false, fastVolSlides = false;
 	public int[] defaultPanning = { 51, 204, 204, 51 };
 	private int[] sequence = { 0 };
+	private String _rev = null; // for doc storage
+	private String _id = null;   // for doc storage
 	private ArrayList<Pattern> patterns = new ArrayList<Pattern>();
 	private ArrayList<Instrument> instruments = new ArrayList<Instrument>();
 	//private IBXM listener;
@@ -583,4 +585,20 @@ public class Module {
 	public void setSample(int instNo, int sampNo, Sample sampDat) {
 		this.getInstrument(instNo).samples[sampNo] = sampDat;
 	}	
+	
+	public void setRevision(String r) {
+		this._rev = r;
+	}
+	
+	public String getRevision() {
+		return this._rev;
+	}
+
+	public String getDocId() {
+		return _id;
+	}
+
+	public void setDocId(String docId) {
+		this._id = docId;
+	}
 }

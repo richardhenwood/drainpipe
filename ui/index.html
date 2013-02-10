@@ -80,7 +80,7 @@
         }
         #instrumentView {
             margin-top: -10px;
-            width: 200px;
+            width: 290px;
             float: left;
             overflow: auto;
             height: 200px;
@@ -170,11 +170,12 @@
 
     <script type="text/javascript">
         function init() {
-            console.log("loading browser");
+            console.log("init'ing Neuralyte Tracker");
         }
 
         function load(evt) {
             nt.handleFileSelect(evt);
+            console.log("loading Neuralyte Tracker");
         }
 
         var neuralyteTracker = (function() {
@@ -237,38 +238,61 @@
                     stopWorking();
                     updateUI(jsong);
                 },
-                save: function(storeURL) {
-                    startWorking();
-                    alert('not implemented');
-                    //var storeURL = apiRoot+"/" + apiName + "/save";
-                    //console.log("saving: " + storeURL);  
-                    //xmlhttp.open('GET', storeURL, false); 
-                    //xmlhttp.send(null);
-                    //if(xmlhttp.status == 200) {
-                    //    console.log(xmlhttp.responseText);
-                    //    targetpath = eval("("+xmlhttp.responseText+")").saveLocation;
-                    //}
-                    //else {
-                    //    console.log("can not create new jsong");
-                    //}
-                    stopWorking();
-                },
-                savecopy: function(storeURL) {
-                    startWorking();
-                    var docStore = document.getElementById('docStore').value;
-                    docStore = encodeURIComponent(docStore);
-                    var storeURL = apiRoot+"/" + apiName + "/savecopy/" + docStore;
-                    console.log("saving: " + storeURL);  
-                    xmlhttp.open('GET', storeURL, false); 
-                    xmlhttp.send(null);
-                    if(xmlhttp.status == 200) {
-                        console.log(xmlhttp.responseText);
-                        targetpath = eval("("+xmlhttp.responseText+")").saveLocation;
+                save: function() {
+                    if (targetpath.match('iriscouch.com/') == null) {
+                        alert("Cannot save this tune. Only iriscouch saving supported. Try 'save a copy' instead.");
                     }
                     else {
-                        console.log("can not create new jsong");
+                        var docStore = document.getElementById('docStore').value;
+                        if (docStore == "") {
+                            alert("you need to specify a docstore.");
+                        }
+                        else {
+                            startWorking();
+                            docStore = encodeURIComponent(docStore);
+                            var storeURL = apiRoot+"/" + docStore + "/save";
+                            console.log("saving: " + storeURL);  
+                            xmlhttp.open('GET', storeURL, false); 
+                            xmlhttp.send(null);
+                            if(xmlhttp.status == 200) {
+                                console.log(xmlhttp.responseText);
+                                var tmpRes = eval("("+xmlhttp.responseText+")");
+                                targetpath = tmpRes.saveLocation;
+                                jsong._rev = tmpRes._rev;
+                            }
+                            else {
+                                console.log("can not create new jsong");
+                            }
+                            stopWorking();
+                        }
                     }
-                    stopWorking();
+                },
+                savecopy: function(storeURL) {
+                    var docStore = document.getElementById('docStore').value;
+                    if (docStore == "") {
+                        alert("you need to specify a docstore.");
+                    }
+                    else {
+                        startWorking();
+                        docStore = encodeURIComponent(docStore);
+                        var storeURL = apiRoot+"/" + apiName + "/savecopy/" + docStore;
+                        console.log("saving: " + storeURL);  
+                        xmlhttp.open('GET', storeURL, false); 
+                        //xmlhttp.send(JSON.stringify(jsong));
+                        xmlhttp.send(null);
+                        if(xmlhttp.status == 200) {
+                            console.log(xmlhttp.responseText);
+                            var tmpRes = eval("("+xmlhttp.responseText+")");
+                            targetpath = tmpRes.saveLocation;
+                            jsong._id = tmpRes._id;
+                            jsong._rev = tmpRes._rev;
+                            apiName = encodeURIComponent(targetpath);
+                        }
+                        else {
+                            console.log("can not create new jsong");
+                        }
+                        stopWorking();
+                    }
                 },
                 saveJsong: function() {
                     window.open( "data:text/json;charset=utf-8," + escape(JSON.stringify(jsong)))
@@ -315,18 +339,18 @@
                     currentStatus = eval("("+xmlhttp.responseText+")");
                 },
                 updateJsong: function(evt) {
-                   if (evt.keyCode == 13) { // 13 == enter.
+                   //if (evt.keyCode == 13) { // 13 == enter.
                        jsong[evt.target.id] = document.getElementById(evt.target.id).value;
                        if (evt.target.id == 'sequence') {
                            console.log('making sequence an array');
                            jsong[evt.target.id] = eval('['+jsong[evt.target.id]+']');
                        }
                        neuralyteTracker.putJsong();
-                   }
+                   //}
                 },
                 putJsong: function() {
                     startWorking();
-                    putJsongURL = apiRoot+"/" + apiName + "/jsong";
+                    var putJsongURL = apiRoot+"/" + apiName + "/jsong";
                     xmlhttp.open('POST', putJsongURL, false); 
                     xmlhttp.send(JSON.stringify(jsong));
                     if(xmlhttp.status == 200)
@@ -827,7 +851,7 @@
             <a href='#' class='but' onClick='neuralyteTracker.load("loadURL");'>load</a> or 
             <a href='#' class='but' onClick='neuralyteTracker.new();'>new</a> <br/>
             <input id='docStore' type="text" size="25" value=""/>
-            <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save("saveURL");'>save</a>
+            <a href='#' id='saveURL' type='text' class='but' onClick='neuralyteTracker.save();'>save</a>
             <a href='#' id='savecopyURL' type='text' class='but' onClick='neuralyteTracker.savecopy("saveURL");'>save a copy</a>
         </div>
         <div id='debug'><span class='spanlabel'>debug</span>
@@ -842,11 +866,11 @@
             <a href='#' class='but' id='stopbutton' onClick='neuralyteTracker.restart();'>restart</a><br/>
         </div>
         <div id='tuneMetadata'><span class='spanlabel'>globals</span>
-            tune name: <input id='songName' type='text' size='25' onkeypress="neuralyteTracker.updateJsong(event)"/></br>
-            gain: <input id='gain' type='text' size='5' onkeypress="neuralyteTracker.updateJsong(event)"/></br>
-            defaultSpeed: <input id='defaultSpeed' type='text' size='5' onkeypress="neuralyteTracker.updateJsong(event)"/></br>
-            defaultTempo: <input id='defaultTempo' type='text' size='5' onkeypress="neuralyteTracker.updateJsong(event)"/>
-            sequence: <input id='sequence' type='text' size='15' onkeypress="neuralyteTracker.updateJsong(event)"/>
+            tune name: <input id='songName' type='text' size='25' onblur="neuralyteTracker.updateJsong(event)"/></br>
+            gain: <input id='gain' type='text' size='5' onblur="neuralyteTracker.updateJsong(event)"/></br>
+            defaultSpeed: <input id='defaultSpeed' type='text' size='5' onblur="neuralyteTracker.updateJsong(event)"/></br>
+            defaultTempo: <input id='defaultTempo' type='text' size='5' onblur="neuralyteTracker.updateJsong(event)"/>
+            sequence: <input id='sequence' type='text' size='15' onblur="neuralyteTracker.updateJsong(event)"/>
         </div>
         <div id='instruments'><span class='spanlabel'>instruments</span>
             <span><a href='#' onClick='neuralyteTracker.addNewInstrument(); return false;'>add new</a></span>

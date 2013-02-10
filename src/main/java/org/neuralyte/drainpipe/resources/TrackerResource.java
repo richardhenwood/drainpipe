@@ -23,6 +23,7 @@ import ibxm.Module;
 import ibxm.Pattern;
 import ibxm.Sample;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -62,6 +63,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.neuralyte.drainpipe.Tracker;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 @Path("/drainpipe")
 public class TrackerResource {
@@ -403,16 +405,78 @@ public class TrackerResource {
 //    	return "massive regression: this isn't supported now";
     }
     
-    @GET @Path("{songname}/savecopy/{docStore}")
+    @GET @Path("{songname}/save")
     @Produces("application/json")
-    public String savecopy(@PathParam("songname") String songName, @PathParam("docStore") String docStore) {
-    	//Object module = tracker.getPlayer().getModule();
+    public String save(@PathParam("songname") String songName) {
+    	Tracker tracker = Tracker.getInstance();
+
     	Module module = tracker.getPlayer().getModule();
     	Gson gson = new Gson();
     	String json = gson.toJson(module);
     	String saveLocation = null;
+		System.out.println("doing overwriting save. rev: "+ module.getRevision());
+		OutputStream os = null;
     	try {
-    		// "http://drainpipe.iriscouch.com/jsong"
+    		URL url = new URL(URLDecoder.decode(songName, "ISO-8859-1") + "/" + module.getDocId());
+    		System.out.println("url: " + url.toString());
+    		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    		conn.setDoOutput(true);
+    		conn.setRequestMethod("PUT");
+    		conn.setRequestProperty("Content-Type", "application/json");
+    		conn.setConnectTimeout(1000);
+    		conn.setReadTimeout(1000);
+    		System.setProperty("http.keepAlive", "false");
+    		conn.setRequestProperty("Connection", "close");
+    		
+    		os = conn.getOutputStream();
+    		os.write(json.toString().getBytes());
+    		
+    		if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+    			throw new RuntimeException("Failed : HTTP error code : "
+    				+ conn.getResponseCode() + conn.getResponseMessage());
+    		}
+    		InputStreamReader in = new InputStreamReader(conn.getInputStream());
+    		BufferedReader br = new BufferedReader(in);
+     
+    		String output;
+    		System.out.println("Output from Server .... \n");
+    		while ((output = br.readLine()) != null) {
+    			CouchResponse cb = gson.fromJson(output, CouchResponse.class);
+    			System.out.println("got rev: " + cb.rev);
+    			module.setRevision(cb.rev);
+    		}
+    		saveLocation = conn.getHeaderField("Location");
+    		System.out.println("response:"+saveLocation);
+    		
+    		conn.disconnect();
+    	} catch (MalformedURLException e) {
+
+    		e.printStackTrace();
+
+    	} catch (IOException e) {
+
+    		e.printStackTrace();
+
+    	}
+    	finally {
+            if (os != null) try { os.close(); } catch (IOException ignore) {}
+        }
+
+    	return("{saveLocation: '"+saveLocation
+    			+"', '_id': '"+module.getDocId()
+    			+"', '_rev': '"+module.getRevision()
+    			+"'}");
+    }
+    
+    @GET @Path("{songname}/savecopy/{docStore}")
+    @Produces("application/json")
+    public String savecopy(@PathParam("songname") String songName, @PathParam("docStore") String docStore) {
+       	Tracker tracker = Tracker.getInstance();
+
+    	String saveLocation = null;
+    	try {
+    		Gson gson = new Gson();
+        	String json = gson.toJson(tracker.getPlayer().getModule());
     		URL url = new URL(URLDecoder.decode(docStore, "ISO-8859-1"));
     		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     		conn.setDoOutput(true);
@@ -429,14 +493,17 @@ public class TrackerResource {
     		InputStreamReader in = new InputStreamReader(conn.getInputStream());
     		BufferedReader br = new BufferedReader(in);
      
-    		String output;
     		System.out.println("Output from Server .... \n");
     		
+    		String output;
     		while ((output = br.readLine()) != null) {
-    			System.out.println(br.readLine());
+    			CouchResponse cb = gson.fromJson(output, CouchResponse.class);
+    			System.out.println("got rev: " + cb.rev);
+    			tracker.getPlayer().getModule().setDocId(cb.id);
+    			tracker.getPlayer().getModule().setRevision(cb.rev);
     		}
+    		br.close();
     		saveLocation = conn.getHeaderField("Location");
-    		//conn.getInstanceFollowRedirects();
     		System.out.println("response:"+saveLocation);
     		
     		conn.disconnect();
@@ -449,9 +516,10 @@ public class TrackerResource {
     		e.printStackTrace();
 
     	}
-    	return("{saveLocation: '"+saveLocation+"'}");
-    	
-    	//return Response.seeOther(new URI(saveLocation)).build();
+    	return("{saveLocation: '"+saveLocation
+    			+"', '_id': '"+tracker.getPlayer().getModule().getDocId()
+    			+"', '_rev': '"+tracker.getPlayer().getModule().getRevision()
+    			+"'}");
     }
     
     // This method 
@@ -466,4 +534,10 @@ public class TrackerResource {
      	System.out.println("new mod loaded from json");
     	return "{save:'complete'}";
     }
+}
+
+class CouchResponse {
+	public String ok;
+	public String id;
+	public String rev;
 }
