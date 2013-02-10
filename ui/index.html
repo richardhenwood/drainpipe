@@ -864,7 +864,7 @@
 
 </script>
     <body onLoad="init();"> 
-        <div id='title'>NeuralyteTracker v0.4.1 <span id='working'></span>tune target: <span id='targetpath'></span><span style='float:right;'>Show debug<input  id='showDebug' name=cb1 value=test type=checkbox onchange='neuralyteTracker.displayDebug()' checked></span></div>
+        <div id='title'>NeuralyteTracker v0.4.2 <span id='working'></span>tune target: <span id='targetpath'></span><span style='float:right;'>Show debug<input  id='showDebug' name=cb1 value=test type=checkbox onchange='neuralyteTracker.displayDebug()' checked></span></div>
         <span id='trackerUI'>
         <div id='tuneBrowser'><span class='spanlabel'>file</span>
             load {xm,s3m,mod,jsong} from: <input id='loadURL' type="text" size="25" value="http://modarchive.org/data/downloads.php?moduleid=122252#caustic_platform.mod"/>
@@ -914,13 +914,18 @@
 
         <span id='documentation'>
         <h2>Doc</h2>
+        Neuralyte Tracker is a RESTful <a href='http://en.wikipedia.org/wiki/Music_tracker'>music tracker</a>. There is a UI written in HTML5+javascript with a rendering engine, written in Java, based on IBXM. Neuralyte Tracker can be run in 'Cloud Utility' mode, where the rendering engine is in the cloud. For what that's worth.
 
-        The source is the documentation. 
 
-        pattern cells are in order, left to right: note, inst, vol, eff, effval.
+        <h3>Supported Formats</h3>
+        A tune is either a mod, xm, s3m, jsong, or a zip containing a mod, xm, s3m. Neuralyte Tracker reads and writes it's native <b>jsong</b> format.
 
-        I couldn't get a webserver configured to serve static pages so i've hacked it to lookup this page.<p/>
-        Currently supported endpoints - all assume /drainpipe/&lt;encoded uri to tune&gt;/. A tune is either a mod, xm, s3m, jsong, or a zip containing a mod, xm, s3m.
+        <h3>Patterns and effect</h3>
+        Pattern cells are in order, left to right: note, inst, vol, eff, effval. Supported effects are listed way below.
+
+        <h3>Neuralyte Tracker API</h3>
+
+        Currently supported endpoints - all assume <b>http://HOST/drainpipe/&lt;ENCODED_URI_OF_TUNE&gt;/</b>. 
 
         <table>
             <tr><th>name</th><th>GET</th><th>POST</th><th>CREATE</th><th>DELETE</th><th>notes</th></tr>
@@ -943,11 +948,16 @@
         <h3>END DOC</h3>
 
         <h3>FAQ</h3>
+
+        <h4>Hells teeth! this UI doesn't even have $BASIC_FEATURE. Even I could program that!</h4>
+
+        A: Sweet! Please send a patch!
         
         <h4>Q: Where can I get help?</h4>
-        A: You can find me, you can email me. If I get enough emails I'll set up a mailing list. Or maybe a thread on <a href='http://www.pouet.net/'>pouet.net</a> will suffice.
+        A: You can find me, you can email me. If I get enough emails I'll set up a mailing list. Or maybe <a href='http://www.pouet.net/topic.php?which=9007'>thread 9007 on pouet.net</a> will suffice.
 
-		...
+
+        <h4>Q: What effects are supported?</h4>
 
         The effects are based on XM supported effects. The integer equivilents are:
 <pre>
@@ -982,9 +992,13 @@ nt, int eqivelent      XM effect
 ? means either I haven't figured it out, or it isn't supported or both.
 </pre>
 
-        Don't forge to check the <a href='http://pouet.net/groups.php?which=10807'>Neuralyte back catalogue on Pouet.net</a><br/>
 
-        Licenses<br/>
+        <h2>Greetings</h2>
+        UK Scene, Pouet.net massive.
+
+        Don't forget to check the <a href='http://pouet.net/groups.php?which=10807'>Neuralyte back catalogue on Pouet.net</a><br/>
+
+        <h3>Licenses</h3>
         The tracker and modifications to IBXM. <a href='http://www.gnu.org/licenses/agpl-3.0.html'>AGPLv3</a><br/>
         <a href='http://code.google.com/p/micromod/'>IBXM</a> <a href='http://opensource.org/licenses/BSD-3-Clause'>New BSD License.<br/>
     <a href="https://raw.github.com/oampo/audiofile.js/master/audiofile.js">Audiofile.js</a> <a href='https://github.com/oampo/audiofile.js/blob/master/LICENSE'>Public Domain Like</a>
