@@ -916,6 +916,8 @@
         <h2>Doc</h2>
         Neuralyte Tracker is a RESTful <a href='http://en.wikipedia.org/wiki/Music_tracker'>music tracker</a>. There is a UI written in HTML5+javascript with a rendering engine, written in Java, based on IBXM. Neuralyte Tracker can be run in 'Cloud Utility' mode, where the rendering engine is in the cloud. For what that's worth.
 
+        <h3>Persisting your jsong</h3>
+        Provided you've included a doc store url, Jsongs can be persisted using the <b>save</b> and <b>save copy</b> buttons. This app has currently be tested with <a href=''>http://iriscouch.com</a> - who provide free storage depending on your usage.
 
         <h3>Supported Formats</h3>
         A tune is either a mod, xm, s3m, jsong, or a zip containing a mod, xm, s3m. Neuralyte Tracker reads and writes it's native <b>jsong</b> format.
@@ -959,10 +961,10 @@
 
         <h4>Q: What effects are supported?</h4>
 
-        The effects are based on XM supported effects. The integer equivilents are:
+        The effects are based on XM supported effects. The integer equivalents are:
 <pre>
 
-nt, int eqivelent      XM effect
+nt, int equivalent      XM effect
   0                    0xy: Arpeggio                          
   1                    1xy: Portamento Up                     
   2                    2xy: Portamento Down                   
@@ -989,7 +991,7 @@ nt, int eqivelent      XM effect
   ?                    Xxy: Extended XM effects
   ?                    Zxy: Macros
 
-? means either I haven't figured it out, or it isn't supported or both.
+? = I haven't figured it out, or it isn't supported, or both.
 </pre>
 
 
