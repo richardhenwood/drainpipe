@@ -43,12 +43,31 @@
             display: block;
         }
         #patterns table {
-            border: 10px;
-            width: 100%;
+            border: 0px;
+            #width: 100%;
         }
         #patterns tr td {
-            padding: 0px;
-            border: 0px;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            padding-right: 0px;
+            padding-left: 0px;
+            border: 0;
+        }
+        #patterns input {
+            padding-top: 0px;
+            padding-bottom: 0px;
+            padding-right: 0px;
+            padding-left: 0px;
+            border: 20;
+            height: 20px;
+        }
+        #pat_sel_box {
+            display: none;
+            position: absolute;
+            border: 1px solid #000000;
+            background: transparent;
+            width: 0;
+            height: 0;
         }
         #rendercontrols {
             background-color: #88ff00;
@@ -90,7 +109,7 @@
             float: left;
             display: block;
             overflow: auto;
-            #height: 200px;
+            /*height: 400px;*/
         }
         #sampleView {
             margin-top: -20px;
@@ -454,7 +473,14 @@
                 },
                 addNewPattern: function(evt) {
                     var numRows = parseInt(prompt("number of rows", 64));
-                    var pat = new newPattern(jsong.numChannels, numRows, jsong.patterns.length);
+                    var pat = null;
+                    try {
+                        pat = new newPattern(jsong.numChannels, numRows, jsong.patterns.length);
+                    }
+                    catch (ex) {
+                        load();
+                        pat = new newPattern(jsong.numChannels, numRows, jsong.patterns.length);
+                    }
                     jsong.patterns[jsong.patterns.length] = pat;
                     updateUI(jsong);
                 },
@@ -508,13 +534,15 @@
                     patSpan.appendChild(numRowstext);
                     patSpan.appendChild(numRows);
                     patSpan.appendChild(patTable);
+                    patSpan.setAttribute('onmousedown', 'neuralyteTracker.patMouseDown(event, "'+patTable.id+'");return false;');
                     var patExpander = document.getElementById('pat_' + patNo+'_expander');
                     var aRemovePattern = document.createElement('a');
                     aRemovePattern.href = '#';
                     aRemovePattern.innerHTML = '-';
                     aRemovePattern.setAttribute('onclick', 'neuralyteTracker.removePattern(event,'+patNo+'); return false;');
+
                     patExpander.appendChild(aRemovePattern);
-                    console.log(patExpander);
+                    //console.log(patExpander);
                 },
                 removePattern: function (evt, patNo) {
                     var patTable = document.getElementById('pat_' + patNo +'_table');
@@ -603,6 +631,80 @@
                     else {
                         debugDiv.style.display = 'none';
                     }
+                },
+                patMouseDown: function (evt, patTableId) {
+                    console.log(evt);
+                    var mxy = getCursorPosition(evt);
+                    //var pat = document.getElementById('patterns');
+                    var pat = document.getElementById(patTableId);
+                    console.log(pat);
+                    var box = document.getElementById('pat_sel_box');
+                    box.orig_x = mxy[0];
+                    box.orig_y = mxy[1];
+                    box.style.left = mxy[0]+"px";
+                    box.style.top = mxy[1]+"px";
+                    box.style.display = "block";
+
+                    //pat.onmousemove = patMouseMove;
+                    pat.setAttribute('onmousemove', "neuralyteTracker.patMouseMove(event, '"+patTableId+"');return false;");
+                    document.onmouseup = neuralyteTracker.patMouseUp;
+                    //document.setAttribute('onmouseup', "neuralyteTracker.patMouseUp(event, '"+patTableId+"');return false;");
+                },
+                patMouseMove: function (e, patTableId) {
+                    //console.log('mouse moove: ' + patTableId);
+                    var mxy = getCursorPosition(e);
+                    var box = document.getElementById("pat_sel_box");
+                    box.style.width = (mxy[0]-box.orig_x)+"px";
+                    box.style.height = (mxy[1]-box.orig_y)+"px";
+
+                    /*
+                    patTable = null;
+                    try {
+                        //patTable = e.target.offsetParent.offsetParent;
+                        patTable = e.currentTarget;
+                    }
+                    catch(ex) {
+                        console.log('outside pattern editor. ignoring');
+                        console.log(e);
+                    }
+                    if (patTable != null) {
+                        var mxy = getCursorPosition(e);
+                        patTable.style.width = (mxy[0]-patTable.orig_x)+"px";
+                        patTable.style.height = (mxy[1]-patTable.orig_y)+"px";
+                    }
+                    else {
+                        console.log(e);
+                        console.log('no pattable!');
+                    }*/
+                },
+                patMouseUp: function (e) {
+                    console.log('mouse up: ' + e);
+                    var box = document.getElementById("pat_sel_box");
+                    console.log(box);
+                    box.style.display = "none";
+                    box.style.width = "0";
+                    box.style.height = "0";
+
+                    console.log(e);
+                    document.onmousemove = function(){};
+                    document.onmouseup = function(){};
+
+                    /*
+                    patTableId = null;
+                    try {
+                        patTableId = e.target.offsetParent.offsetParent.id;
+                        var box = document.getElementById(patTableId);
+                        box.style.display = "none";
+                        box.style.width = "0";
+                        box.style.height = "0";
+                    }
+                    catch(ex) {
+                        console.log('outside pattern editor. ignoring');
+                    }
+                    document.onmousemove = function(){};
+                    document.onmouseup = function(){
+                        alert('mouse up');
+                    };*/
                 }
             }
             function loadWavFile (evt) {
@@ -625,6 +727,19 @@
                 }
                 reader.readAsBinaryString(oFile);
             }
+
+            function getCursorPosition(e) {
+                e = e || window.event;
+                if (e)
+                {
+                    if (e.pageX || e.pageX == 0) return [e.pageX,e.pageY];
+                    var dE = document.documentElement || {};
+                    var dB = document.body || {};
+                    if ((e.clientX || e.clientX == 0) && ((dB.scrollLeft || dB.scrollLeft == 0) || (dE.clientLeft || dE.clientLeft == 0))) return [e.clientX + (dE.scrollLeft || dB.scrollLeft || 0) - (dE.clientLeft || 0),e.clientY + (dE.scrollTop || dB.scrollTop || 0) - (dE.clientTop || 0)];
+                }
+                return null;
+            }
+
 
             function setNewSample(dat, idstr, name, c2Rate, relNote) {
                 var n = idstr.split('_');
@@ -897,7 +1012,8 @@
             <a href='#' type='text' class='but' onClick='neuralyteTracker.saveJsong("");'>saveJsong</a>
             <a href='#' type='text' class='but' onClick='neuralyteTracker.updateUI("");'>updateUI</a>
             <a href='#' type='text' class='but' onClick='neuralyteTracker.getStatus("");'>get status</a>
-        </div>
+            </div>
+            <div id='pat_sel_box'></div>
         <div id='patterns'><span class='spanlabel'>patterns</span>
             <span><a href='#' onClick='neuralyteTracker.addNewPattern(); return false;'>add new</a></span>
             <div id='patternView'></div>
