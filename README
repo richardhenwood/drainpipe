@@ -23,7 +23,11 @@ that has audio out and is within ear-shot.
 
 -- Getting started --
 
-To get working, you should install linux, cd into this directory, and then:
+To get working, you should install linux (I suggest fedora), git, and maven. Issue the command:
+
+git clone git://gitorious.org/drainpipe/drainpipe.git
+
+next, cd into drainpipe directory and build the code with:
   mvn assembly:assembly
 
 then
@@ -45,8 +49,18 @@ a maven project, enter this directory and run:
   mvn assembly:assembly
 
 
+-- Streaming over the interwebs --
+
+You can use a basic encoder to stream the output of the Neuralyte Tracker over the interweb. Instructions are provide to stdout by the Neuralyte Tracker runtime.
+
 
 
 -- Roadmap --
 
-+ jsong peristance.
+next release:
+
++ cut and paste support for tracks.
+
+next release + 1:
+
++ mulituser support.
